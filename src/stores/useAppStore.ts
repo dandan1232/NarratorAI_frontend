@@ -41,10 +41,27 @@ interface AppStore extends AppState {
   reset: () => void;
 }
 
-const initialState: AppState = {
+const initialState: AppState & {
+  companions: Companion[];
+  currentCompanion: Companion | null;
+  sessions: ChatSession[];
+  currentSession: ChatSession | null;
+  memories: Memory[];
+  voices: Voice[];
+  isLoading: boolean;
+  error: string | null;
+} = {
   user: null,
   isInitialized: false,
   currentView: 'welcome',
+  companions: [],
+  currentCompanion: null,
+  sessions: [],
+  currentSession: null,
+  memories: [],
+  voices: [],
+  isLoading: false,
+  error: null,
 };
 
 export const useAppStore = create<AppStore>()(

@@ -17,7 +17,7 @@ export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { companions, currentCompanion, setCurrentCompanion, setCurrentView } = useAppStore();
+  const { companions, currentCompanion, setCurrentCompanion, currentView, setCurrentView } = useAppStore();
 
   const menuItems = [
     { icon: MessageCircle, label: '聊天', path: '/chat', view: 'chat' as const },

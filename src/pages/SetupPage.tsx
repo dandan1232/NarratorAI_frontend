@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../stores/useAppStore';
+import { Companion } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   User,
@@ -93,13 +94,10 @@ export default function SetupPage() {
   };
 
   const handleComplete = () => {
-    console.log('开始聊天按钮被点击');
-
     // Update user nickname
     if (user) {
       setUser({ ...user, nickname: nickname || '用户' });
     } else {
-      // Create user if not exists
       setUser({
         id: 'user-1',
         nickname: nickname || '用户',
@@ -114,10 +112,8 @@ export default function SetupPage() {
 
     // Create companion
     const template = companionTemplates.find((t) => t.id === selectedTemplate);
-    console.log('选择的模板:', template);
-
     if (template) {
-      const newCompanion = {
+      const newCompanion: Companion = {
         id: `companion-${Date.now()}`,
         name: template.name,
         avatar: template.avatar,
@@ -126,22 +122,13 @@ export default function SetupPage() {
         description: template.description,
         traits: template.traits,
         greeting: template.greeting,
-        voiceId: undefined,
-        voiceSettings: undefined,
       };
-      console.log('创建新伙伴:', newCompanion);
       addCompanion(newCompanion);
       setCurrentCompanion(newCompanion);
     }
 
-    // Update view and navigate
     setCurrentView('chat');
-    console.log('设置视图为chat，准备跳转');
-
-    // Force navigation to chat page
-    setTimeout(() => {
-      window.location.href = '/chat';
-    }, 50);
+    navigate('/chat');
   };
 
   const renderStep = () => {
