@@ -126,7 +126,7 @@ export default function VoicePage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg'
                   : 'glass hover:bg-gray-50'
               }`}
             >
@@ -155,7 +155,7 @@ export default function VoicePage() {
                 {/* Upload Section */}
                 <div>
                   <div
-                    className="border-2 border-dashed border-pink-300 rounded-2xl p-8 text-center cursor-pointer hover:border-pink-400 transition-colors"
+                    className="border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center cursor-pointer hover:border-orange-400 transition-colors"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {audioFile ? (
@@ -170,7 +170,7 @@ export default function VoicePage() {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <Upload className="w-12 h-12 mx-auto text-pink-400" />
+                        <Upload className="w-12 h-12 mx-auto text-orange-400" />
                         <p className="font-medium text-gray-800">点击或拖拽上传音频</p>
                         <p className="text-sm text-gray-500">
                           支持 MP3、WAV、M4A 格式，建议 10-30 秒
@@ -222,7 +222,7 @@ export default function VoicePage() {
                       value={voiceName}
                       onChange={(e) => setVoiceName(e.target.value)}
                       placeholder="给这个声音起个名字"
-                      className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none transition-colors"
                     />
                   </div>
 
@@ -232,7 +232,7 @@ export default function VoicePage() {
                     className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 ${
                       !audioFile || !voiceName || isProcessing
                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg'
+                        : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white hover:shadow-lg'
                     }`}
                   >
                     {isProcessing ? (
@@ -285,7 +285,7 @@ export default function VoicePage() {
                     value={voiceName}
                     onChange={(e) => setVoiceName(e.target.value)}
                     placeholder="给这个声音起个名字"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none transition-colors"
                   />
                 </div>
 
@@ -297,7 +297,7 @@ export default function VoicePage() {
                     value={voiceDescription}
                     onChange={(e) => setVoiceDescription(e.target.value)}
                     placeholder="描述你想要的声音，例如：温柔的女声，带有治愈感..."
-                    className="w-full h-24 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none resize-none transition-colors"
+                    className="w-full h-24 px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none resize-none transition-colors"
                   />
                 </div>
 
@@ -309,7 +309,7 @@ export default function VoicePage() {
                     <select
                       value={gender}
                       onChange={(e) => setGender(e.target.value as any)}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none transition-colors"
                     >
                       <option value="female">女声</option>
                       <option value="male">男声</option>
@@ -324,7 +324,7 @@ export default function VoicePage() {
                     <select
                       value={age}
                       onChange={(e) => setAge(e.target.value as any)}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none transition-colors"
                     >
                       <option value="young">年轻</option>
                       <option value="middle">中年</option>
@@ -339,7 +339,7 @@ export default function VoicePage() {
                     <select
                       value={style}
                       onChange={(e) => setStyle(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none transition-colors"
                     >
                       <option value="温柔">温柔</option>
                       <option value="活泼">活泼</option>
@@ -356,7 +356,7 @@ export default function VoicePage() {
                   className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 ${
                     !voiceName || !voiceDescription || isProcessing
                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg'
+                      : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white hover:shadow-lg'
                   }`}
                 >
                   {isProcessing ? (
@@ -390,7 +390,7 @@ export default function VoicePage() {
                 </div>
                 <button
                   onClick={() => setActiveTab('clone')}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all duration-200"
                 >
                   <Plus className="w-4 h-4" />
                   添加声音
@@ -414,7 +414,7 @@ export default function VoicePage() {
                       key={voice.id}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="p-4 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-100"
+                      className="p-4 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div>
@@ -429,9 +429,9 @@ export default function VoicePage() {
                             className="p-2 rounded-lg hover:bg-white transition-colors"
                           >
                             {playingId === voice.id ? (
-                              <Pause className="w-5 h-5 text-pink-500" />
+                              <Pause className="w-5 h-5 text-orange-500" />
                             ) : (
-                              <Play className="w-5 h-5 text-pink-500" />
+                              <Play className="w-5 h-5 text-orange-500" />
                             )}
                           </button>
                           <button
@@ -460,7 +460,7 @@ export default function VoicePage() {
                           {Array.from({ length: 20 }).map((_, i) => (
                             <div
                               key={i}
-                              className="w-1 bg-pink-400 rounded-full animate-pulse"
+                              className="w-1 bg-orange-400 rounded-full animate-pulse"
                               style={{
                                 height: `${Math.random() * 100}%`,
                                 animationDelay: `${i * 0.1}s`,

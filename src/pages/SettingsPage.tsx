@@ -44,7 +44,7 @@ export default function SettingsPage() {
         {/* User Settings */}
         <div className="glass rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-3 mb-6">
-            <User className="w-5 h-5 text-pink-500" />
+            <User className="w-5 h-5 text-orange-500" />
             <h2 className="text-xl font-semibold text-gray-800">个人信息</h2>
           </div>
 
@@ -59,7 +59,7 @@ export default function SettingsPage() {
                 onChange={(e) =>
                   updateUserPreferences({} as any) // This needs a separate user update
                 }
-                className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none transition-colors"
                 placeholder="输入你的昵称"
               />
             </div>
@@ -69,7 +69,7 @@ export default function SettingsPage() {
         {/* Preferences */}
         <div className="glass rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-3 mb-6">
-            <Shield className="w-5 h-5 text-pink-500" />
+            <Shield className="w-5 h-5 text-orange-500" />
             <h2 className="text-xl font-semibold text-gray-800">偏好设置</h2>
           </div>
 
@@ -78,7 +78,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50">
               <div className="flex items-center gap-3">
                 {user.preferences.theme === 'dark' ? (
-                  <Moon className="w-5 h-5 text-purple-500" />
+                  <Moon className="w-5 h-5 text-amber-500" />
                 ) : (
                   <Sun className="w-5 h-5 text-yellow-500" />
                 )}
@@ -97,7 +97,7 @@ export default function SettingsPage() {
                 }
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   user.preferences.theme === 'dark'
-                    ? 'bg-purple-500 text-white'
+                    ? 'bg-amber-500 text-white'
                     : 'bg-gray-200 text-gray-700'
                 }`}
               >
@@ -207,7 +207,7 @@ export default function SettingsPage() {
                   type="text"
                   value={companionName}
                   onChange={(e) => setCompanionName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none transition-colors"
                 />
               </div>
 
@@ -218,13 +218,13 @@ export default function SettingsPage() {
                 <textarea
                   value={companionPersonality}
                   onChange={(e) => setCompanionPersonality(e.target.value)}
-                  className="w-full h-24 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none resize-none transition-colors"
+                  className="w-full h-24 px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none resize-none transition-colors"
                 />
               </div>
 
               <button
                 onClick={handleSaveCompanion}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200"
               >
                 <Save className="w-4 h-4" />
                 保存设置

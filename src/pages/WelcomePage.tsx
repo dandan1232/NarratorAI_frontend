@@ -40,8 +40,8 @@ export default function WelcomePage() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="mb-8"
           >
-            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 flex items-center justify-center animate-float">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-300 flex items-center justify-center">
+            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-orange-200 via-amber-200 to-yellow-200 flex items-center justify-center animate-float">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-300 via-amber-300 to-yellow-300 flex items-center justify-center">
                 <Heart className="w-12 h-12 text-white" />
               </div>
             </div>
@@ -63,8 +63,8 @@ export default function WelcomePage() {
             className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
           >
             <div className="glass rounded-2xl p-6 card-hover">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-pink-100 flex items-center justify-center">
-                <MessageCircle className="w-6 h-6 text-pink-500" />
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
+                <MessageCircle className="w-6 h-6 text-orange-500" />
               </div>
               <h3 className="font-semibold text-gray-800 mb-2">情感陪伴</h3>
               <p className="text-sm text-gray-600">
@@ -73,8 +73,8 @@ export default function WelcomePage() {
             </div>
 
             <div className="glass rounded-2xl p-6 card-hover">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-purple-500" />
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-amber-500" />
               </div>
               <h3 className="font-semibold text-gray-800 mb-2">个性化记忆</h3>
               <p className="text-sm text-gray-600">
@@ -83,8 +83,8 @@ export default function WelcomePage() {
             </div>
 
             <div className="glass rounded-2xl p-6 card-hover">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-indigo-100 flex items-center justify-center">
-                <Heart className="w-6 h-6 text-indigo-500" />
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-yellow-100 flex items-center justify-center">
+                <Heart className="w-6 h-6 text-yellow-500" />
               </div>
               <h3 className="font-semibold text-gray-800 mb-2">语音对话</h3>
               <p className="text-sm text-gray-600">
@@ -103,7 +103,7 @@ export default function WelcomePage() {
         >
           <button
             onClick={handleStart}
-            className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
           >
             开始旅程
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -119,7 +119,7 @@ export default function WelcomePage() {
             animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           >
-            <Heart className="w-8 h-8 text-pink-400" />
+            <Heart className="w-8 h-8 text-orange-400" />
           </motion.div>
         </div>
         <div className="absolute bottom-20 right-10 opacity-20">
@@ -127,7 +127,7 @@ export default function WelcomePage() {
             animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
           >
-            <Sparkles className="w-8 h-8 text-purple-400" />
+            <Sparkles className="w-8 h-8 text-amber-400" />
           </motion.div>
         </div>
       </motion.div>

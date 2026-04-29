@@ -155,7 +155,7 @@ export default function SetupPage() {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 placeholder="输入你的昵称..."
-                className="w-full px-6 py-4 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none text-center text-lg transition-colors"
+                className="w-full px-6 py-4 rounded-2xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none text-center text-lg transition-colors"
               />
             </div>
           </motion.div>
@@ -184,12 +184,12 @@ export default function SetupPage() {
                   onClick={() => setSelectedTemplate(template.id)}
                   className={`relative p-6 rounded-2xl transition-all duration-300 ${
                     selectedTemplate === template.id
-                      ? 'bg-gradient-to-br from-pink-100 to-purple-100 border-2 border-pink-300 shadow-lg scale-105'
+                      ? 'bg-gradient-to-br from-orange-100 to-amber-100 border-2 border-orange-300 shadow-lg scale-105'
                       : 'glass hover:shadow-md'
                   }`}
                 >
                   {selectedTemplate === template.id && (
-                    <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center">
+                    <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                   )}
@@ -222,7 +222,7 @@ export default function SetupPage() {
 
             <div className="max-w-md mx-auto">
               {selectedTemplate && (
-                <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-pink-50 to-purple-50">
+                <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-orange-50 to-amber-50">
                   <h4 className="font-semibold text-gray-800 mb-2">默认性格特点：</h4>
                   <div className="flex flex-wrap gap-2">
                     {companionTemplates
@@ -230,7 +230,7 @@ export default function SetupPage() {
                       ?.traits.map((trait) => (
                         <span
                           key={trait}
-                          className="px-3 py-1 rounded-full bg-white text-sm text-pink-600 border border-pink-200"
+                          className="px-3 py-1 rounded-full bg-white text-sm text-orange-600 border border-orange-200"
                         >
                           {trait}
                         </span>
@@ -243,7 +243,7 @@ export default function SetupPage() {
                 value={customPersonality}
                 onChange={(e) => setCustomPersonality(e.target.value)}
                 placeholder="描述你想要的性格特点，例如：温柔、幽默、善解人意..."
-                className="w-full h-32 px-4 py-3 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none resize-none transition-colors"
+                className="w-full h-32 px-4 py-3 rounded-2xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none resize-none transition-colors"
               />
             </div>
           </motion.div>
@@ -258,8 +258,8 @@ export default function SetupPage() {
             exit={{ opacity: 0, x: -50 }}
             className="space-y-6 text-center"
           >
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center animate-float">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center animate-float">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-300 to-amber-300 flex items-center justify-center">
                 <Heart className="w-10 h-10 text-white" />
               </div>
             </div>
@@ -304,7 +304,7 @@ export default function SetupPage() {
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
                   currentStep >= step.id
-                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg'
                     : 'bg-gray-200 text-gray-500'
                 }`}
               >
@@ -317,7 +317,7 @@ export default function SetupPage() {
               {index < steps.length - 1 && (
                 <div
                   className={`w-20 h-1 mx-2 transition-colors duration-300 ${
-                    currentStep > step.id ? 'bg-pink-500' : 'bg-gray-200'
+                    currentStep > step.id ? 'bg-orange-500' : 'bg-gray-200'
                   }`}
                 />
               )}
@@ -352,7 +352,7 @@ export default function SetupPage() {
               className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
                 currentStep === 2 && !selectedTemplate
                   ? 'opacity-50 cursor-not-allowed bg-gray-300'
-                  : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg'
+                  : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white hover:shadow-lg'
               }`}
             >
               下一步
@@ -361,7 +361,7 @@ export default function SetupPage() {
           ) : (
             <button
               onClick={handleComplete}
-              className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
+              className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
             >
               开始聊天
               <MessageCircle className="w-4 h-4" />

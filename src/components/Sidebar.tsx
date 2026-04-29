@@ -49,7 +49,7 @@ export default function Sidebar() {
                 exit={{ opacity: 0, x: -20 }}
                 className="flex items-center gap-2"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-purple-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -85,11 +85,11 @@ export default function Sidebar() {
               onClick={() => handleNavigate(item.path, item.view)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 isActive
-                  ? 'bg-gradient-to-r from-pink-100 to-purple-100 text-pink-600 shadow-sm'
+                  ? 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-700 shadow-sm'
                   : 'hover:bg-gray-100 text-gray-600'
               }`}
             >
-              <item.icon className={`w-5 h-5 ${isActive ? 'text-pink-500' : ''}`} />
+              <item.icon className={`w-5 h-5 ${isActive ? 'text-orange-500' : ''}`} />
               <AnimatePresence>
                 {!isCollapsed && (
                   <motion.span
@@ -136,11 +136,11 @@ export default function Sidebar() {
                     }}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${
                       currentCompanion?.id === companion.id
-                        ? 'bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200'
+                        ? 'bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200'
                         : 'hover:bg-gray-50'
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center text-lg">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center text-lg">
                       {companion.avatar}
                     </div>
                     <div className="text-left">
@@ -166,12 +166,12 @@ export default function Sidebar() {
                 }}
                 className={`w-full flex justify-center p-2 rounded-lg transition-colors ${
                   currentCompanion?.id === companion.id
-                    ? 'bg-pink-100'
+                    ? 'bg-orange-100'
                     : 'hover:bg-gray-100'
                 }`}
                 title={companion.name}
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center text-sm">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center text-sm">
                   {companion.avatar}
                 </div>
               </button>

@@ -124,8 +124,8 @@ export default function ChatPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center">
-            <Smile className="w-12 h-12 text-pink-400" />
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center">
+            <Smile className="w-12 h-12 text-orange-400" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
             选择一个伙伴开始聊天
@@ -148,7 +148,7 @@ export default function ChatPage() {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center text-2xl">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center text-2xl">
               {currentCompanion.avatar}
             </div>
             <div>
@@ -203,7 +203,7 @@ export default function ChatPage() {
 
                 {message.audioUrl && (
                   <div className="mt-2">
-                    <button className="flex items-center gap-2 text-sm text-pink-500 hover:text-pink-600">
+                    <button className="flex items-center gap-2 text-sm text-orange-500 hover:text-orange-600">
                       <Play className="w-4 h-4" />
                       播放语音
                     </button>
@@ -265,7 +265,7 @@ export default function ChatPage() {
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="输入你想说的话..."
-              className="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none resize-none transition-colors"
+              className="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none resize-none transition-colors"
               rows={1}
               style={{ minHeight: '48px', maxHeight: '120px' }}
             />
@@ -308,7 +308,7 @@ export default function ChatPage() {
               disabled={!inputText.trim()}
               className={`p-3 rounded-xl transition-all duration-200 ${
                 inputText.trim()
-                  ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg'
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white hover:shadow-lg'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
