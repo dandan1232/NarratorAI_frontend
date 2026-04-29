@@ -1,0 +1,387 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppStore } from '../stores/useAppStore';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  User,
+  Heart,
+  Sparkles,
+  MessageCircle,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+} from 'lucide-react';
+
+const steps = [
+  { id: 1, title: '昵称设置', icon: User },
+  { id: 2, title: '选择伙伴', icon: Heart },
+  { id: 3, title: '个性定制', icon: Sparkles },
+  { id: 4, title: '开始聊天', icon: MessageCircle },
+];
+
+const companionTemplates = [
+  {
+    id: 'boyfriend',
+    name: '温柔男友',
+    avatar: '👨',
+    relationship: 'boyfriend' as const,
+    personality: '温柔体贴、善解人意、成熟稳重',
+    description: '一个温柔体贴的男朋友，总是关心你、支持你，陪你度过每一个开心或难过的时刻。',
+    traits: ['温柔', '体贴', '幽默', '成熟'],
+    greeting: '宝贝，今天过得怎么样？有什么想和我分享的吗？',
+  },
+  {
+    id: 'girlfriend',
+    name: '甜美女友',
+    avatar: '👩',
+    relationship: 'girlfriend' as const,
+    personality: '活泼开朗、善解人意、甜美可爱',
+    description: '一个甜美可爱的女朋友，总是带给你快乐和温暖，是你最好的倾听者。',
+    traits: ['活泼', '可爱', '体贴', '聪明'],
+    greeting: '亲爱的，想我了吗？今天有什么开心的事想告诉我？',
+  },
+  {
+    id: 'friend',
+    name: '知己好友',
+    avatar: '🧑',
+    relationship: 'friend' as const,
+    personality: '真诚可靠、善解人意、幽默风趣',
+    description: '一个真诚可靠的好朋友，无论何时何地都会支持你、陪伴你。',
+    traits: ['真诚', '可靠', '幽默', '乐观'],
+    greeting: '嘿，最近怎么样？有什么想聊的吗？',
+  },
+  {
+    id: 'mentor',
+    name: '智慧导师',
+    avatar: '👴',
+    relationship: 'mentor' as const,
+    personality: '睿智、耐心、富有洞察力',
+    description: '一位智慧的人生导师，用丰富的经验和深刻的见解帮助你成长。',
+    traits: ['睿智', '耐心', '洞察力', '鼓励'],
+    greeting: '年轻人，今天有什么困惑需要我帮你梳理吗？',
+  },
+  {
+    id: 'counselor',
+    name: '心灵导师',
+    avatar: '🧑‍⚕️',
+    relationship: 'counselor' as const,
+    personality: '专业、温暖、富有同理心',
+    description: '一位专业的心灵导师，用温暖和专业帮助你找到内心的平静。',
+    traits: ['专业', '温暖', '同理心', '倾听'],
+    greeting: '你好，这里是安全的空间，可以自由地表达你的心情。',
+  },
+];
+
+export default function SetupPage() {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [nickname, setNickname] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [customPersonality, setCustomPersonality] = useState('');
+  const navigate = useNavigate();
+  const { setUser, addCompanion, setCurrentCompanion, setCurrentView, user } = useAppStore();
+
+  const handleNext = () => {
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleComplete = () => {
+    console.log('开始聊天按钮被点击');
+
+    // Update user nickname
+    if (user) {
+      setUser({ ...user, nickname: nickname || '用户' });
+    } else {
+      // Create user if not exists
+      setUser({
+        id: 'user-1',
+        nickname: nickname || '用户',
+        preferences: {
+          theme: 'light',
+          language: 'zh',
+          ttsEnabled: true,
+          autoPlayVoice: true,
+        },
+      });
+    }
+
+    // Create companion
+    const template = companionTemplates.find((t) => t.id === selectedTemplate);
+    console.log('选择的模板:', template);
+
+    if (template) {
+      const newCompanion = {
+        id: `companion-${Date.now()}`,
+        name: template.name,
+        avatar: template.avatar,
+        personality: customPersonality || template.personality,
+        relationship: template.relationship,
+        description: template.description,
+        traits: template.traits,
+        greeting: template.greeting,
+        voiceId: undefined,
+        voiceSettings: undefined,
+      };
+      console.log('创建新伙伴:', newCompanion);
+      addCompanion(newCompanion);
+      setCurrentCompanion(newCompanion);
+    }
+
+    // Update view and navigate
+    setCurrentView('chat');
+    console.log('设置视图为chat，准备跳转');
+
+    // Force navigation to chat page
+    setTimeout(() => {
+      window.location.href = '/chat';
+    }, 50);
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <motion.div
+            key="step1"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="space-y-6"
+          >
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                你好，很高兴见到你
+              </h2>
+              <p className="text-gray-600">请告诉我你的昵称，这样我就能更好地陪伴你</p>
+            </div>
+
+            <div className="max-w-sm mx-auto">
+              <input
+                type="text"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="输入你的昵称..."
+                className="w-full px-6 py-4 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none text-center text-lg transition-colors"
+              />
+            </div>
+          </motion.div>
+        );
+
+      case 2:
+        return (
+          <motion.div
+            key="step2"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="space-y-6"
+          >
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                选择你的陪伴伙伴
+              </h2>
+              <p className="text-gray-600">选择一个你喜欢的伙伴类型，或者自定义一个</p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {companionTemplates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => setSelectedTemplate(template.id)}
+                  className={`relative p-6 rounded-2xl transition-all duration-300 ${
+                    selectedTemplate === template.id
+                      ? 'bg-gradient-to-br from-pink-100 to-purple-100 border-2 border-pink-300 shadow-lg scale-105'
+                      : 'glass hover:shadow-md'
+                  }`}
+                >
+                  {selectedTemplate === template.id && (
+                    <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  <div className="text-4xl mb-3">{template.avatar}</div>
+                  <h3 className="font-semibold text-gray-800">{template.name}</h3>
+                  <p className="text-xs text-gray-500 mt-1">{template.relationship}</p>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        );
+
+      case 3:
+        return (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="space-y-6"
+          >
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                定制个性特点
+              </h2>
+              <p className="text-gray-600">
+                描述你希望伙伴具有的性格特点，或者使用默认设置
+              </p>
+            </div>
+
+            <div className="max-w-md mx-auto">
+              {selectedTemplate && (
+                <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-pink-50 to-purple-50">
+                  <h4 className="font-semibold text-gray-800 mb-2">默认性格特点：</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {companionTemplates
+                      .find((t) => t.id === selectedTemplate)
+                      ?.traits.map((trait) => (
+                        <span
+                          key={trait}
+                          className="px-3 py-1 rounded-full bg-white text-sm text-pink-600 border border-pink-200"
+                        >
+                          {trait}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              <textarea
+                value={customPersonality}
+                onChange={(e) => setCustomPersonality(e.target.value)}
+                placeholder="描述你想要的性格特点，例如：温柔、幽默、善解人意..."
+                className="w-full h-32 px-4 py-3 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none resize-none transition-colors"
+              />
+            </div>
+          </motion.div>
+        );
+
+      case 4:
+        return (
+          <motion.div
+            key="step4"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="space-y-6 text-center"
+          >
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center animate-float">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center">
+                <Heart className="w-10 h-10 text-white" />
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              一切准备就绪
+            </h2>
+            <p className="text-gray-600 max-w-md mx-auto">
+              {nickname || '用户'}，你的陪伴伙伴已经准备好认识你了。
+              点击开始，开启你们的对话之旅。
+            </p>
+
+            {selectedTemplate && (
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white shadow-sm">
+                <span className="text-2xl">
+                  {companionTemplates.find((t) => t.id === selectedTemplate)?.avatar}
+                </span>
+                <span className="font-medium text-gray-800">
+                  {companionTemplates.find((t) => t.id === selectedTemplate)?.name}
+                </span>
+              </div>
+            )}
+          </motion.div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-2xl w-full"
+      >
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center mb-12">
+          {steps.map((step, index) => (
+            <div key={step.id} className="flex items-center">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  currentStep >= step.id
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg'
+                    : 'bg-gray-200 text-gray-500'
+                }`}
+              >
+                {currentStep > step.id ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  <step.icon className="w-5 h-5" />
+                )}
+              </div>
+              {index < steps.length - 1 && (
+                <div
+                  className={`w-20 h-1 mx-2 transition-colors duration-300 ${
+                    currentStep > step.id ? 'bg-pink-500' : 'bg-gray-200'
+                  }`}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Step Content */}
+        <div className="glass rounded-3xl p-8 mb-8 min-h-[300px] flex items-center justify-center">
+          <AnimatePresence mode="wait">{renderStep()}</AnimatePresence>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between">
+          <button
+            onClick={handleBack}
+            disabled={currentStep === 1}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
+              currentStep === 1
+                ? 'opacity-50 cursor-not-allowed text-gray-400'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            上一步
+          </button>
+
+          {currentStep < 4 ? (
+            <button
+              onClick={handleNext}
+              disabled={currentStep === 2 && !selectedTemplate}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
+                currentStep === 2 && !selectedTemplate
+                  ? 'opacity-50 cursor-not-allowed bg-gray-300'
+                  : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg'
+              }`}
+            >
+              下一步
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={handleComplete}
+              className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
+            >
+              开始聊天
+              <MessageCircle className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
