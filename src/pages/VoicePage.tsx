@@ -10,7 +10,6 @@ import {
   Volume2,
   Trash2,
   Plus,
-  Settings,
   Check,
 } from 'lucide-react';
 
@@ -409,7 +408,7 @@ export default function VoicePage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {voices.map((voice) => (
+                  {voices.map((voice: any) => (
                     <motion.div
                       key={voice.id}
                       initial={{ opacity: 0, scale: 0.9 }}

@@ -9,7 +9,7 @@ import VoicePage from './pages/VoicePage';
 import Layout from './components/Layout';
 
 function App() {
-  const { isInitialized, currentView, setCurrentView, companions } = useAppStore();
+  const { isInitialized, currentView, setCurrentView } = useAppStore();
   const navigate = useNavigate();
 
   useEffect(() => {

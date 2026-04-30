@@ -9,7 +9,6 @@ import {
   Smile,
   MoreVertical,
   Play,
-  Pause,
   Volume2,
 } from 'lucide-react';
 import { Message } from '../types';
@@ -28,7 +27,6 @@ export default function ChatPage() {
     addMessage,
     addSession,
     setCurrentSession,
-    user,
   } = useAppStore();
 
   // Auto-scroll to bottom
@@ -40,7 +38,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (currentCompanion && !currentSession) {
       const existingSession = sessions.find(
-        (s) => s.companionId === currentCompanion.id
+        (s: any) => s.companionId === currentCompanion.id
       );
 
       if (existingSession) {
@@ -175,7 +173,7 @@ export default function ChatPage() {
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         <AnimatePresence>
-          {currentSession?.messages.map((message) => (
+          {currentSession?.messages.map((message: any) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 20 }}

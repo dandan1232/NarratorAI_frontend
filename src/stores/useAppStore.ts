@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AppState, User, Companion, ChatSession, Message, Memory, Voice } from '../types';
+import { AppState, CompanionState, User, Companion, ChatSession, Message, Memory, Voice } from '../types';
 
-interface AppStore extends AppState {
+interface AppStore extends AppState, CompanionState {
   // User actions
   setUser: (user: User) => void;
   updateUserPreferences: (preferences: Partial<User['preferences']>) => void;
@@ -66,7 +66,7 @@ const initialState: AppState & {
 
 export const useAppStore = create<AppStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       // User actions
@@ -84,7 +84,7 @@ export const useAppStore = create<AppStore>()(
         set((state) => ({ companions: [...state.companions, companion] })),
       updateCompanion: (id, updates) =>
         set((state) => ({
-          companions: state.companions.map((c) => (c.id === id ? { ...c, ...updates } : c)),
+          companions: state.companions.map((c: Companion) => (c.id === id ? { ...c, ...updates } : c)),
           currentCompanion:
             state.currentCompanion?.id === id
               ? { ...state.currentCompanion, ...updates }
@@ -92,7 +92,7 @@ export const useAppStore = create<AppStore>()(
         })),
       deleteCompanion: (id) =>
         set((state) => ({
-          companions: state.companions.filter((c) => c.id !== id),
+          companions: state.companions.filter((c: Companion) => c.id !== id),
           currentCompanion: state.currentCompanion?.id === id ? null : state.currentCompanion,
         })),
       setCurrentCompanion: (companion) => set({ currentCompanion: companion }),
@@ -103,7 +103,7 @@ export const useAppStore = create<AppStore>()(
         set((state) => ({ sessions: [...state.sessions, session] })),
       updateSession: (id, updates) =>
         set((state) => ({
-          sessions: state.sessions.map((s) => (s.id === id ? { ...s, ...updates } : s)),
+          sessions: state.sessions.map((s: ChatSession) => (s.id === id ? { ...s, ...updates } : s)),
           currentSession:
             state.currentSession?.id === id
               ? { ...state.currentSession, ...updates }
@@ -111,13 +111,13 @@ export const useAppStore = create<AppStore>()(
         })),
       deleteSession: (id) =>
         set((state) => ({
-          sessions: state.sessions.filter((s) => s.id !== id),
+          sessions: state.sessions.filter((s: ChatSession) => s.id !== id),
           currentSession: state.currentSession?.id === id ? null : state.currentSession,
         })),
       setCurrentSession: (session) => set({ currentSession: session }),
       addMessage: (sessionId, message) =>
         set((state) => ({
-          sessions: state.sessions.map((s) =>
+          sessions: state.sessions.map((s: ChatSession) =>
             s.id === sessionId
               ? { ...s, messages: [...s.messages, message], updatedAt: Date.now() }
               : s
@@ -137,7 +137,7 @@ export const useAppStore = create<AppStore>()(
             s.id === sessionId
               ? {
                   ...s,
-                  messages: s.messages.map((m) =>
+                  messages: s.messages.map((m: Message) =>
                     m.id === messageId ? { ...m, ...updates } : m
                   ),
                 }
@@ -147,7 +147,7 @@ export const useAppStore = create<AppStore>()(
             state.currentSession?.id === sessionId
               ? {
                   ...state.currentSession,
-                  messages: state.currentSession.messages.map((m) =>
+                  messages: state.currentSession.messages.map((m: Message) =>
                     m.id === messageId ? { ...m, ...updates } : m
                   ),
                 }
@@ -157,15 +157,15 @@ export const useAppStore = create<AppStore>()(
       // Memory actions
       setMemories: (memories) => set({ memories }),
       addMemory: (memory) =>
-        set((state) => ({ memories: [...state.memories, memory] })),
+        set((state) => ({ memories: [...state.memories, memory] as Memory[] })),
       deleteMemory: (id) =>
-        set((state) => ({ memories: state.memories.filter((m) => m.id !== id) })),
+        set((state) => ({ memories: state.memories.filter((m: Memory) => m.id !== id) })),
 
       // Voice actions
       setVoices: (voices) => set({ voices }),
       addVoice: (voice) => set((state) => ({ voices: [...state.voices, voice] })),
       deleteVoice: (id) =>
-        set((state) => ({ voices: state.voices.filter((v) => v.id !== id) })),
+        set((state) => ({ voices: state.voices.filter((v: Voice) => v.id !== id) })),
 
       // App actions
       setCurrentView: (view) => set({ currentView: view }),

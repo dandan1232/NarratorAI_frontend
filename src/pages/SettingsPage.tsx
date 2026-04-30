@@ -56,7 +56,7 @@ export default function SettingsPage() {
               <input
                 type="text"
                 value={user.nickname}
-                onChange={(e) =>
+                onChange={(_e) =>
                   updateUserPreferences({} as any) // This needs a separate user update
                 }
                 className="w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none transition-colors"
