@@ -16,6 +16,18 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/mimo': {
+        target: 'https://token-plan-cn.xiaomimimo.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/mimo/, '/anthropic'),
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            // 添加认证头
+            proxyReq.setHeader('x-api-key', process.env.VITE_MIMO_AUTH_TOKEN || '');
+            proxyReq.setHeader('anthropic-version', '2023-06-01');
+          });
+        },
+      },
     },
   },
 })

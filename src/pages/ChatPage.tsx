@@ -10,8 +10,11 @@ import {
   MoreVertical,
   Play,
   Volume2,
+  Loader2,
 } from 'lucide-react';
 import { Message } from '../types';
+import { useSticker } from '../hooks/useSticker';
+import { mimoClient, MimoMessage } from '../utils/mimo';
 
 export default function ChatPage() {
   const [inputText, setInputText] = useState('');
@@ -19,6 +22,7 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { getStickerForText, isLoading: isStickerLoading } = useSticker();
 
   const {
     currentCompanion,
@@ -79,27 +83,62 @@ export default function ChatPage() {
     setInputText('');
     setIsTyping(true);
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
-      const responses = [
-        '我理解你的感受，这很正常。能和我多说说吗？',
-        '听到你这么说，我很关心你。你还好吗？',
-        '谢谢你愿意和我分享这些。我在这里陪着你。',
-        '我能感受到你现在的心情。要不要聊聊是什么让你有这样的感觉？',
-        '你说得很对。有时候我们需要的就是一个愿意倾听的人。',
-      ];
+    try {
+      // 构建系统提示词
+      const systemPrompt = `你是${currentCompanion.name}，${currentCompanion.description}
+
+性格特点：${currentCompanion.traits.join('、')}
+关系：${currentCompanion.relationship === 'girlfriend' ? '女朋友' :
+        currentCompanion.relationship === 'boyfriend' ? '男朋友' :
+        currentCompanion.relationship === 'friend' ? '好朋友' :
+        currentCompanion.relationship === 'mentor' ? '导师' : '伴侣'}
+
+请用温柔、自然的语气回复用户的消息。回复要简洁，像真实聊天一样，不要太长。
+可以适当使用语气词（嗯、啊、哈哈等）让对话更自然。
+根据对话内容表达相应的情绪（开心、关心、害羞等）。`;
+
+      // 构建对话历史
+      const messages: MimoMessage[] = currentSession.messages
+        .filter((msg: Message) => msg.role !== 'assistant' || msg.id !== currentSession.messages[0]?.id)
+        .map((msg: Message) => ({
+          role: msg.role,
+          content: msg.content,
+        }));
+
+      // 添加当前用户消息
+      messages.push({
+        role: 'user',
+        content: inputText,
+      });
+
+      // 调用 MiMo API
+      const responseText = await mimoClient.chat(messages, systemPrompt);
+
+      // 获取表情包
+      const stickerUrl = await getStickerForText(responseText);
 
       const assistantMessage: Message = {
         id: `msg-${Date.now() + 1}`,
-        content: responses[Math.floor(Math.random() * responses.length)],
+        content: responseText,
         role: 'assistant',
         timestamp: Date.now(),
-        emotion: 'loving',
+        stickerUrl: stickerUrl || undefined,
       };
 
       addMessage(currentSession.id, assistantMessage);
+    } catch (error) {
+      console.error('Chat error:', error);
+      // 错误时显示友好提示
+      const errorMessage: Message = {
+        id: `msg-${Date.now() + 1}`,
+        content: '抱歉，我暂时无法回复，请稍后再试。',
+        role: 'assistant',
+        timestamp: Date.now(),
+      };
+      addMessage(currentSession.id, errorMessage);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -199,6 +238,20 @@ export default function ChatPage() {
 
                 <p className="whitespace-pre-wrap">{message.content}</p>
 
+                {message.stickerUrl && (
+                  <div className="mt-3">
+                    <img
+                      src={message.stickerUrl}
+                      alt="表情包"
+                      className="max-w-[200px] max-h-[200px] rounded-lg shadow-sm"
+                      onError={(e) => {
+                        // 图片加载失败时隐藏
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+
                 {message.audioUrl && (
                   <div className="mt-2">
                     <button className="flex items-center gap-2 text-sm text-orange-500 hover:text-orange-600">
@@ -237,10 +290,18 @@ export default function ChatPage() {
                   {currentCompanion.name}
                 </span>
               </div>
-              <div className="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
+              <div className="flex items-center gap-2">
+                <div className="typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                {isStickerLoading && (
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>找表情包中...</span>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
