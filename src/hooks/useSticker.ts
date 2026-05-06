@@ -52,12 +52,12 @@ export function useSticker() {
     return null;
   }, []);
 
-  // 搜索表情包
+  // 搜索表情包（使用代理）
   const searchSticker = useCallback(async (keyword: string): Promise<string | null> => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `https://api.tangdouz.com/a/biaoq.php?return=json&nr=${encodeURIComponent(keyword)}`
+        `/sticker/a/biaoq.php?return=json&nr=${encodeURIComponent(keyword)}`
       );
 
       if (!response.ok) {

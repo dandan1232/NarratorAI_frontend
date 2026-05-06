@@ -15,7 +15,13 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "Bash(curl -s -X POST http://localhost:3001/mimo/messages -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(curl -s -X POST https://token-plan-cn.xiaomimimo.com/anthropic/messages -H 'Content-Type: application/json' -H 'x-api-key: tp-cx642nzvd8h1pxyzzlr3vp7e2gw7oqtv8xkeufxv1mrnd8yj' -H 'anthropic-version: 2023-06-01' -d '{ *)",
+      "Bash(curl -s -X POST http://localhost:3001/mimo/v1/messages -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(curl *)",
+      "Bash(node *)",
+      "Bash(env)"
     ]
   }
 }

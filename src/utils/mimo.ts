@@ -52,25 +52,37 @@ class MimoClient {
   async chat(
     messages: MimoMessage[],
     systemPrompt?: string,
-    model: string = 'MiMo-V2.5-Pro'
+    model: string = 'mimo-v2.5-pro'
   ): Promise<string> {
+    // 构建消息数组，确保格式正确
+    const formattedMessages = messages.map(msg => ({
+      role: msg.role,
+      content: [
+        {
+          type: 'text',
+          text: msg.content,
+        },
+      ],
+    }));
+
     const body: any = {
       model,
-      max_tokens: 1024,
-      messages,
+      max_tokens: 2048,
+      stream: false,
+      messages: formattedMessages,
     };
 
     if (systemPrompt) {
       body.system = systemPrompt;
     }
 
-    const response = await this.request<MimoResponse>('/messages', {
+    const response = await this.request<any>('/v1/messages', {
       method: 'POST',
       body: JSON.stringify(body),
     });
 
-    // 提取文本内容
-    const textBlock = response.content.find((block) => block.type === 'text');
+    // 提取文本内容（跳过 thinking 部分）
+    const textBlock = response.content?.find((block: any) => block.type === 'text');
     return textBlock?.text || '';
   }
 
