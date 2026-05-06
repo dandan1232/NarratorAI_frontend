@@ -8,7 +8,14 @@
       "Bash(npm run *)",
       "Bash(curl -s http://localhost:3000)",
       "Bash(pkill -f \"vite\")",
-      "Bash(curl -s http://localhost:3001)"
+      "Bash(curl -s http://localhost:3001)",
+      "WebFetch(domain:clawhub.ai)",
+      "Bash(netstat -tlnp)",
+      "Bash(git config *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(gh auth *)"
     ]
   }
 }
