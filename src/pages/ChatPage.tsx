@@ -25,15 +25,20 @@ import {
   updateEmotionalState,
   checkAchievements,
   checkCharacterCardAchievements,
+  getOpeningMessage,
 } from '../utils/characterAnalyzer';
 import { AffectionDisplay } from '../components/AffectionDisplay';
+import { RelationshipPanel } from '../components/RelationshipPanel';
 import { CollectionToast } from '../components/CollectionToast';
+import { AchievementToast } from '../components/AchievementToast';
 
 export default function ChatPage() {
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [newFact, setNewFact] = useState<RevealedFact | null>(null);
+  const [showPanel, setShowPanel] = useState(false);
+  const [newAchievement, setNewAchievement] = useState<{ name: string; icon: string; reward: number } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { getStickerForText, isLoading: isStickerLoading } = useSticker();
@@ -70,16 +75,20 @@ export default function ChatPage() {
       if (existingSession) {
         setCurrentSession(existingSession);
       } else {
+        // 使用开场策略或默认问候
+        const openingMessage = getOpeningMessage(currentCompanion.openingStrategy);
+        const greetingContent = openingMessage || currentCompanion.greeting;
+
         const newSession: any = {
           id: `session-${Date.now()}`,
           companionId: currentCompanion.id,
           messages: [
             {
               id: `msg-${Date.now()}`,
-              content: currentCompanion.greeting,
+              content: greetingContent,
               role: 'assistant',
               timestamp: Date.now(),
-              emotion: 'loving',
+              emotion: openingMessage ? 'neutral' : 'loving',
             },
           ],
           createdAt: Date.now(),
@@ -198,11 +207,20 @@ export default function ChatPage() {
 
       // 6. 检查成就
       const userMessageCount = allMessages.filter((m) => m.role === 'user').length;
-      const newAchievements = checkAchievements(currentCompanion, userMessageCount);
-      newAchievements.forEach((id) => unlockAchievement(currentCompanion.id, id));
+      const newAchievementIds = checkAchievements(currentCompanion, userMessageCount);
+      newAchievementIds.forEach((id) => unlockAchievement(currentCompanion.id, id));
 
-      const newCardAchievements = checkCharacterCardAchievements(currentCompanion);
-      newCardAchievements.forEach((category) => unlockCharacterCardAchievement(currentCompanion.id, category));
+      const newCardAchievementCategories = checkCharacterCardAchievements(currentCompanion);
+      newCardAchievementCategories.forEach((category) => unlockCharacterCardAchievement(currentCompanion.id, category));
+
+      // 显示第一个解锁的成就提示
+      if (newAchievementIds.length > 0) {
+        const achievement = currentCompanion.achievements.achievements.find((a) => a.id === newAchievementIds[0]);
+        if (achievement) {
+          setNewAchievement({ name: achievement.name, icon: achievement.icon, reward: achievement.reward });
+          setTimeout(() => setNewAchievement(null), 3000);
+        }
+      }
     } catch (error) {
       console.error('Chat error:', error);
       // 错误时显示友好提示
@@ -253,7 +271,9 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex">
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col">
       {/* Chat Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
@@ -277,8 +297,14 @@ export default function ChatPage() {
             <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
               <Volume2 className="w-5 h-5 text-gray-500" />
             </button>
-            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <MoreVertical className="w-5 h-5 text-gray-500" />
+            <button
+              onClick={() => setShowPanel(!showPanel)}
+              className={`p-2 rounded-lg transition-colors ${
+                showPanel ? 'bg-orange-100 text-orange-600' : 'hover:bg-gray-100 text-gray-500'
+              }`}
+              title="关系档案"
+            >
+              <MoreVertical className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -463,6 +489,23 @@ export default function ChatPage() {
         fact={newFact}
         onDismiss={() => setNewFact(null)}
       />
+
+      {/* Achievement Toast */}
+      <AchievementToast
+        achievement={newAchievement}
+        onDismiss={() => setNewAchievement(null)}
+      />
+      </div>
+
+      {/* Relationship Panel */}
+      <AnimatePresence>
+        {showPanel && currentCompanion && (
+          <RelationshipPanel
+            companion={currentCompanion}
+            onClose={() => setShowPanel(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
