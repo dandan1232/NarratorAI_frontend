@@ -67,7 +67,12 @@ export default function ChatPage() {
 
   // Initialize session if needed
   useEffect(() => {
-    if (currentCompanion && !currentSession) {
+    if (!currentCompanion) return;
+
+    // 检查当前会话是否属于当前伴侣
+    const sessionBelongsToCompanion = currentSession?.companionId === currentCompanion.id;
+
+    if (!sessionBelongsToCompanion) {
       const existingSession = sessions.find(
         (s: any) => s.companionId === currentCompanion.id
       );
