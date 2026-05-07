@@ -21,7 +21,9 @@
       "Bash(curl -s -X POST http://localhost:3001/mimo/v1/messages -H 'Content-Type: application/json' -d '{ *)",
       "Bash(curl *)",
       "Bash(node *)",
-      "Bash(env)"
+      "Bash(env)",
+      "Bash(gh repo *)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

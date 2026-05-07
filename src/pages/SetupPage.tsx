@@ -12,6 +12,11 @@ import {
   ArrowLeft,
   Check,
 } from 'lucide-react';
+import {
+  createInitialCharacterCard,
+  createInitialAffection,
+  createInitialMemory,
+} from '../utils/characterAnalyzer';
 
 const steps = [
   { id: 1, title: '昵称设置', icon: User },
@@ -122,6 +127,10 @@ export default function SetupPage() {
         description: template.description,
         traits: template.traits,
         greeting: template.greeting,
+        // Phase 1: 初始化角色卡、好感度、记忆系统
+        characterCard: createInitialCharacterCard(),
+        affection: createInitialAffection(),
+        memory: createInitialMemory(),
       };
       addCompanion(newCompanion);
       setCurrentCompanion(newCompanion);

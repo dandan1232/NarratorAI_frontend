@@ -1,6 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AppState, CompanionState, User, Companion, ChatSession, Message, Memory, Voice } from '../types';
+import {
+  AppState, CompanionState, User, Companion, ChatSession, Message, Memory, Voice,
+  CharacterCard, AffectionSystem, AffectionLevel, RevealedFact, SessionSummary, EmotionalMemory
+} from '../types';
+
+// 好感度等级计算
+function calculateAffectionLevel(points: number): AffectionLevel {
+  if (points <= 150) return 'stranger';
+  if (points <= 300) return 'acquaintance';
+  if (points <= 500) return 'friendly';
+  if (points <= 700) return 'close';
+  if (points <= 900) return 'crush';
+  return 'lover';
+}
 
 interface AppStore extends AppState, CompanionState {
   // User actions
@@ -39,6 +52,20 @@ interface AppStore extends AppState, CompanionState {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   reset: () => void;
+
+  // Phase 1: CyberPersona 设计理念
+  // 角色卡相关
+  updateCharacterCard: (companionId: string, updates: Partial<CharacterCard>) => void;
+  addRevealedFact: (companionId: string, fact: RevealedFact) => void;
+
+  // 好感度相关
+  addAffectionPoints: (companionId: string, points: number) => void;
+  completeDailyTask: (companionId: string, taskId: string) => void;
+  resetDailyTasks: (companionId: string) => void;
+
+  // 记忆相关
+  addSessionSummary: (companionId: string, summary: SessionSummary) => void;
+  addEmotionalMemory: (companionId: string, memory: EmotionalMemory) => void;
 }
 
 const initialState: AppState & {
@@ -173,6 +200,176 @@ export const useAppStore = create<AppStore>()(
       setLoading: (loading) => set({ isLoading: loading }),
       setError: (error) => set({ error }),
       reset: () => set(initialState),
+
+      // Phase 1: CyberPersona 设计理念
+      // 角色卡相关
+      updateCharacterCard: (companionId, updates) =>
+        set((state) => ({
+          companions: state.companions.map((c: Companion) =>
+            c.id === companionId
+              ? { ...c, characterCard: { ...c.characterCard, ...updates } }
+              : c
+          ),
+          currentCompanion:
+            state.currentCompanion?.id === companionId
+              ? { ...state.currentCompanion, characterCard: { ...state.currentCompanion.characterCard, ...updates } }
+              : state.currentCompanion,
+        })),
+
+      addRevealedFact: (companionId, fact) =>
+        set((state) => ({
+          companions: state.companions.map((c: Companion) =>
+            c.id === companionId
+              ? {
+                  ...c,
+                  memory: {
+                    ...c.memory,
+                    revealedFacts: [...c.memory.revealedFacts, fact],
+                  },
+                }
+              : c
+          ),
+          currentCompanion:
+            state.currentCompanion?.id === companionId
+              ? {
+                  ...state.currentCompanion,
+                  memory: {
+                    ...state.currentCompanion.memory,
+                    revealedFacts: [...state.currentCompanion.memory.revealedFacts, fact],
+                  },
+                }
+              : state.currentCompanion,
+        })),
+
+      // 好感度相关
+      addAffectionPoints: (companionId, points) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          const newPoints = Math.min(1000, Math.max(0, companion.affection.points + points));
+          const newLevel = calculateAffectionLevel(newPoints);
+
+          const updatedAffection: AffectionSystem = {
+            ...companion.affection,
+            points: newPoints,
+            level: newLevel,
+            lastInteraction: Date.now(),
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, affection: updatedAffection } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, affection: updatedAffection }
+                : state.currentCompanion,
+          };
+        }),
+
+      completeDailyTask: (companionId, taskId) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          const task = companion.affection.dailyTasks.find((t) => t.id === taskId);
+          if (!task || task.completed) return state;
+
+          const updatedTasks = companion.affection.dailyTasks.map((t) =>
+            t.id === taskId ? { ...t, completed: true } : t
+          );
+
+          const updatedAffection: AffectionSystem = {
+            ...companion.affection,
+            dailyTasks: updatedTasks,
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, affection: updatedAffection } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, affection: updatedAffection }
+                : state.currentCompanion,
+          };
+        }),
+
+      resetDailyTasks: (companionId) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          const updatedTasks = companion.affection.dailyTasks.map((t) => ({
+            ...t,
+            completed: false,
+          }));
+
+          const updatedAffection: AffectionSystem = {
+            ...companion.affection,
+            dailyTasks: updatedTasks,
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, affection: updatedAffection } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, affection: updatedAffection }
+                : state.currentCompanion,
+          };
+        }),
+
+      // 记忆相关
+      addSessionSummary: (companionId, summary) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          // 保持最近 5 次会话摘要
+          const updatedSummaries = [...companion.memory.sessionSummaries, summary].slice(-5);
+
+          const updatedMemory = {
+            ...companion.memory,
+            sessionSummaries: updatedSummaries,
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, memory: updatedMemory } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, memory: updatedMemory }
+                : state.currentCompanion,
+          };
+        }),
+
+      addEmotionalMemory: (companionId, memory) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          // 保持最近 20 条情绪记忆
+          const updatedMemories = [...companion.memory.emotionalMemories, memory].slice(-20);
+
+          const updatedMemory = {
+            ...companion.memory,
+            emotionalMemories: updatedMemories,
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, memory: updatedMemory } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, memory: updatedMemory }
+                : state.currentCompanion,
+          };
+        }),
     }),
     {
       name: 'narrator-ai-storage',

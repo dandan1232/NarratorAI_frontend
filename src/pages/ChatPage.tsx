@@ -12,14 +12,23 @@ import {
   Volume2,
   Loader2,
 } from 'lucide-react';
-import { Message } from '../types';
+import { Message, RevealedFact } from '../types';
 import { useSticker } from '../hooks/useSticker';
 import { mimoClient, MimoMessage } from '../utils/mimo';
+import {
+  buildSystemPrompt,
+  calculateAffectionChange,
+  extractCharacterFacts,
+  generateSessionSummary,
+} from '../utils/characterAnalyzer';
+import { AffectionDisplay } from '../components/AffectionDisplay';
+import { CollectionToast } from '../components/CollectionToast';
 
 export default function ChatPage() {
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [newFact, setNewFact] = useState<RevealedFact | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { getStickerForText, isLoading: isStickerLoading } = useSticker();
@@ -31,6 +40,9 @@ export default function ChatPage() {
     addMessage,
     addSession,
     setCurrentSession,
+    addAffectionPoints,
+    addRevealedFact,
+    addSessionSummary,
   } = useAppStore();
 
   // Auto-scroll to bottom
@@ -84,18 +96,8 @@ export default function ChatPage() {
     setIsTyping(true);
 
     try {
-      // 构建系统提示词
-      const systemPrompt = `你是${currentCompanion.name}，${currentCompanion.description}
-
-性格特点：${currentCompanion.traits.join('、')}
-关系：${currentCompanion.relationship === 'girlfriend' ? '女朋友' :
-        currentCompanion.relationship === 'boyfriend' ? '男朋友' :
-        currentCompanion.relationship === 'friend' ? '好朋友' :
-        currentCompanion.relationship === 'mentor' ? '导师' : '伴侣'}
-
-请用温柔、自然的语气回复用户的消息。回复要简洁，像真实聊天一样，不要太长。
-可以适当使用语气词（嗯、啊、哈哈等）让对话更自然。
-根据对话内容表达相应的情绪（开心、关心、害羞等）。`;
+      // 构建增强的系统提示词（包含人格、好感度、记忆）
+      const systemPrompt = buildSystemPrompt(currentCompanion);
 
       // 构建对话历史
       const messages: MimoMessage[] = currentSession.messages
@@ -126,6 +128,36 @@ export default function ChatPage() {
       };
 
       addMessage(currentSession.id, assistantMessage);
+
+      // ===== Phase 1: 后处理逻辑 =====
+
+      // 1. 计算好感度变化
+      const affectionChange = calculateAffectionChange(
+        inputText,
+        responseText,
+        currentCompanion.affection.level
+      );
+      addAffectionPoints(currentCompanion.id, affectionChange);
+
+      // 2. 提取角色信息（量子态坍缩）
+      const allMessages = [...currentSession.messages, userMessage, assistantMessage];
+      const newFacts = await extractCharacterFacts(allMessages);
+      if (newFacts.length > 0) {
+        newFacts.forEach((fact) => {
+          addRevealedFact(currentCompanion.id, fact);
+        });
+        // 显示收集提示
+        setNewFact(newFacts[0]);
+        setTimeout(() => setNewFact(null), 3000);
+      }
+
+      // 3. 生成会话摘要（每 10 轮对话生成一次）
+      if (allMessages.length > 0 && allMessages.length % 10 === 0) {
+        const summary = await generateSessionSummary(allMessages);
+        if (summary) {
+          addSessionSummary(currentCompanion.id, summary);
+        }
+      }
     } catch (error) {
       console.error('Chat error:', error);
       // 错误时显示友好提示
@@ -192,9 +224,7 @@ export default function ChatPage() {
               <h2 className="font-semibold text-gray-800">
                 {currentCompanion.name}
               </h2>
-              <p className="text-sm text-gray-500">
-                {currentCompanion.relationship} · 在线
-              </p>
+              <AffectionDisplay affection={currentCompanion.affection} />
             </div>
           </div>
 
@@ -382,6 +412,12 @@ export default function ChatPage() {
           </p>
         </div>
       </motion.div>
+
+      {/* Collection Toast */}
+      <CollectionToast
+        fact={newFact}
+        onDismiss={() => setNewFact(null)}
+      />
     </div>
   );
 }
