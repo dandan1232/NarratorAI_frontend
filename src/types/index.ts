@@ -28,6 +28,12 @@ export interface Companion {
   characterCard: CharacterCard;
   affection: AffectionSystem;
   memory: MemorySystem;
+
+  // Phase 2: 深化体验
+  relationshipSystem: RelationshipSystem;
+  emotionalDepth: EmotionalDepthSystem;
+  openingStrategy: OpeningStrategyType;
+  achievements: AchievementSystem;
 }
 
 export type RelationshipType =
@@ -196,6 +202,119 @@ export interface DailyTask {
   description: string;
   completed: boolean;
   reward: number;  // 好感度奖励
+}
+
+// ==================== Phase 2: 关系系统 ====================
+
+// 关系维度（5 维）
+export interface RelationshipDimensions {
+  trust: number;           // 信任感 0-100: 觉得对方靠不靠谱
+  security: number;        // 安全感 0-100: 觉得不会被抛弃
+  closeness: number;       // 亲密感 0-100: 情感亲近程度
+  neediness: number;       // 依恋度 0-100: 多想和对方待在一起
+  possessiveness: number;  // 占有欲 0-100: 对对方与他人的敏感度
+}
+
+// 关系维度等级
+export type RelationshipLevel = 'frozen' | 'low' | 'medium' | 'high' | 'full';
+
+// 关系系统
+export interface RelationshipSystem {
+  dimensions: RelationshipDimensions;
+  overallLevel: RelationshipLevel;  // 整体关系等级
+  lastUpdate: number;
+}
+
+// ==================== Phase 2: 情绪深度系统 ====================
+
+// 情绪状态
+export interface EmotionalState {
+  currentEmotion: EmotionType;
+  currentIntensity: number;  // 1-5
+  moodFactor: number;        // 情绪因子 0.5-1.5，影响关系变化
+  stressLevel: number;       // 压力等级 0-100
+}
+
+// 情绪深度系统
+export interface EmotionalDepthSystem {
+  state: EmotionalState;
+  history: EmotionalHistoryEntry[];
+  factors: MoodFactors;
+}
+
+// 情绪历史条目
+export interface EmotionalHistoryEntry {
+  emotion: EmotionType;
+  intensity: number;
+  trigger: string;  // 触发原因
+  timestamp: number;
+}
+
+// 情绪因子
+export interface MoodFactors {
+  positiveMultiplier: number;  // 正面情绪倍率
+  negativeMultiplier: number;  // 负面情绪倍率
+  stressMultiplier: number;    // 压力倍率
+}
+
+// ==================== Phase 2: 开场策略 ====================
+
+// 开场策略类型
+export type OpeningStrategyType =
+  | 'emotion_vent'      // 情绪宣泄
+  | 'sensory_share'     // 感官分享
+  | 'schrodinger'       // 薛定谔提问
+  | 'accidental'        // 假装发错
+  | 'observer';         // 观测者静默
+
+// 开场策略
+export interface OpeningStrategy {
+  type: OpeningStrategyType;
+  name: string;
+  description: string;
+  templates: string[];  // 开场白模板
+}
+
+// ==================== Phase 2: 成就系统 ====================
+
+// 成就类型
+export type AchievementType =
+  | 'interaction'   // 互动类
+  | 'voice'         // 语音类
+  | 'image'         // 图片类
+  | 'relationship'  // 关系类
+  | 'time'          // 时间类
+  | 'collection';   // 收集类
+
+// 成就
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  type: AchievementType;
+  icon: string;
+  condition: string;  // 达成条件描述
+  reward: number;     // 好感度奖励
+  unlocked: boolean;
+  unlockedAt?: number;
+}
+
+// 角色卡成就
+export interface CharacterCardAchievement {
+  id: string;
+  category: 'identity' | 'preference' | 'innerWorld' | 'habit';
+  name: string;
+  description: string;
+  requiredCount: number;  // 需要收集的数量
+  unlocked: boolean;
+  unlockedAt?: number;
+}
+
+// 成就系统
+export interface AchievementSystem {
+  achievements: Achievement[];
+  characterCardAchievements: CharacterCardAchievement[];
+  totalPoints: number;
 }
 
 // 记忆系统

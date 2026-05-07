@@ -20,6 +20,11 @@ import {
   calculateAffectionChange,
   extractCharacterFacts,
   generateSessionSummary,
+  calculateRelationshipDelta,
+  detectEmotionFromText,
+  updateEmotionalState,
+  checkAchievements,
+  checkCharacterCardAchievements,
 } from '../utils/characterAnalyzer';
 import { AffectionDisplay } from '../components/AffectionDisplay';
 import { CollectionToast } from '../components/CollectionToast';
@@ -43,6 +48,11 @@ export default function ChatPage() {
     addAffectionPoints,
     addRevealedFact,
     addSessionSummary,
+    updateRelationshipDimensions,
+    updateEmotionalState: updateEmotionalStateStore,
+    addEmotionalHistoryEntry,
+    unlockAchievement,
+    unlockCharacterCardAchievement,
   } = useAppStore();
 
   // Auto-scroll to bottom
@@ -158,6 +168,41 @@ export default function ChatPage() {
           addSessionSummary(currentCompanion.id, summary);
         }
       }
+
+      // ===== Phase 2: 深化体验后处理 =====
+
+      // 4. 更新关系维度
+      const relationshipDelta = calculateRelationshipDelta(
+        inputText,
+        responseText,
+        currentCompanion.characterCard.basePersonality
+      );
+      if (Object.keys(relationshipDelta).length > 0) {
+        updateRelationshipDimensions(currentCompanion.id, relationshipDelta);
+      }
+
+      // 5. 更新情绪状态
+      const { emotion, intensity } = detectEmotionFromText(responseText);
+      const newEmotionalState = updateEmotionalState(
+        currentCompanion.emotionalDepth.state,
+        emotion,
+        intensity
+      );
+      updateEmotionalStateStore(currentCompanion.id, newEmotionalState);
+      addEmotionalHistoryEntry(currentCompanion.id, {
+        emotion,
+        intensity,
+        trigger: inputText.slice(0, 50),
+        timestamp: Date.now(),
+      });
+
+      // 6. 检查成就
+      const userMessageCount = allMessages.filter((m) => m.role === 'user').length;
+      const newAchievements = checkAchievements(currentCompanion, userMessageCount);
+      newAchievements.forEach((id) => unlockAchievement(currentCompanion.id, id));
+
+      const newCardAchievements = checkCharacterCardAchievements(currentCompanion);
+      newCardAchievements.forEach((category) => unlockCharacterCardAchievement(currentCompanion.id, category));
     } catch (error) {
       console.error('Chat error:', error);
       // 错误时显示友好提示

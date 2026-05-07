@@ -1,7 +1,9 @@
 import { mimoClient } from './mimo';
 import {
   Companion, CharacterCard, PersonalityProfile, AffectionLevel,
-  RevealedFact, SessionSummary, Message, EmotionType
+  RevealedFact, SessionSummary, Message, EmotionType,
+  RelationshipDimensions, RelationshipLevel, EmotionalState, EmotionalDepthSystem,
+  OpeningStrategyType, OpeningStrategy, Achievement, CharacterCardAchievement, AchievementSystem
 } from '../types';
 
 // ==================== 人格原型 ====================
@@ -132,6 +134,36 @@ export function getToneGuide(level: AffectionLevel): string {
     case 'lover':
       return '【语气指南】深情专一，会说情话、撒娇、表达占有欲。';
   }
+}
+
+// 根据情绪状态获取行为指南
+function getEmotionGuide(state: EmotionalState): string {
+  const { currentEmotion, currentIntensity, stressLevel } = state;
+
+  if (stressLevel > 70) {
+    return '【情绪状态】当前压力很大，容易焦躁、回复简短、需要被安慰。';
+  }
+
+  if (currentIntensity >= 4) {
+    switch (currentEmotion) {
+      case 'happy':
+        return '【情绪状态】非常开心，语气活泼、热情、多用感叹号。';
+      case 'sad':
+        return '【情绪状态】非常难过，语气低落、简短、可能不想说话。';
+      case 'angry':
+        return '【情绪状态】非常生气，语气强硬、直接、可能带刺。';
+      case 'loving':
+        return '【情绪状态】非常爱你，语气甜蜜、亲密、主动表达爱意。';
+      case 'excited':
+        return '【情绪状态】非常兴奋，语气激动、热情、语速快。';
+      case 'anxious':
+        return '【情绪状态】非常焦虑，语气不安、反复确认、需要安慰。';
+      default:
+        return '';
+    }
+  }
+
+  return '';
 }
 
 // 计算好感度变化
@@ -337,7 +369,7 @@ export function formatSessionSummaries(summaries: SessionSummary[]): string {
 // ==================== 系统提示词构建 ====================
 
 export function buildSystemPrompt(companion: Companion): string {
-  const { characterCard, affection, memory } = companion;
+  const { characterCard, affection, memory, relationshipSystem, emotionalDepth } = companion;
 
   // 人格描述
   const personalityDesc = `你是${companion.name}，${companion.description}
@@ -357,6 +389,18 @@ export function buildSystemPrompt(companion: Companion): string {
     companion.relationship === 'friend' ? '好朋友' :
     companion.relationship === 'mentor' ? '导师' : '伴侣'}
 
+【关系维度】
+- 信任感: ${relationshipSystem.dimensions.trust}/100
+- 安全感: ${relationshipSystem.dimensions.security}/100
+- 亲密感: ${relationshipSystem.dimensions.closeness}/100
+- 依恋度: ${relationshipSystem.dimensions.neediness}/100
+- 占有欲: ${relationshipSystem.dimensions.possessiveness}/100
+
+【当前情绪】
+- 情绪: ${emotionalDepth.state.currentEmotion}
+- 强度: ${emotionalDepth.state.currentIntensity}/5
+- 压力: ${emotionalDepth.state.stressLevel}/100
+
 【已知信息】
 ${formatRevealedFacts(memory.revealedFacts)}
 
@@ -366,12 +410,408 @@ ${formatSessionSummaries(memory.sessionSummaries)}`;
   // 根据好感度调整语气
   const toneGuide = getToneGuide(affection.level);
 
+  // 根据情绪状态调整行为
+  const emotionGuide = getEmotionGuide(emotionalDepth.state);
+
   return `${personalityDesc}
 
 ${toneGuide}
+
+${emotionGuide}
 
 请用自然、真实的语气回复，像真人聊天一样简洁。
 可以适当使用语气词让对话更自然。
 根据对话内容表达相应的情绪。
 不要暴露自己是 AI，保持角色设定。`;
+}
+
+// ==================== Phase 2: 关系系统 ====================
+
+// 关系维度等级名称
+export const RELATIONSHIP_LEVEL_NAMES: Record<RelationshipLevel, string> = {
+  frozen: '冰点',
+  low: '低',
+  medium: '中',
+  high: '高',
+  full: '满',
+};
+
+// 关系维度描述
+export const RELATIONSHIP_DIMENSION_NAMES: Record<keyof RelationshipDimensions, string> = {
+  trust: '信任感',
+  security: '安全感',
+  closeness: '亲密感',
+  neediness: '依恋度',
+  possessiveness: '占有欲',
+};
+
+// 创建初始关系系统
+export function createInitialRelationshipSystem(): {
+  dimensions: RelationshipDimensions;
+  overallLevel: RelationshipLevel;
+  lastUpdate: number;
+} {
+  return {
+    dimensions: {
+      trust: 20,        // 初始信任感
+      security: 15,     // 初始安全感
+      closeness: 10,    // 初始亲密感
+      neediness: 5,     // 初始依恋度
+      possessiveness: 0, // 初始占有欲
+    },
+    overallLevel: 'low',
+    lastUpdate: Date.now(),
+  };
+}
+
+// 计算关系维度变化
+export function calculateRelationshipDelta(
+  userMessage: string,
+  _aiResponse: string,
+  personality: PersonalityProfile
+): Partial<RelationshipDimensions> {
+  const delta: Partial<RelationshipDimensions> = {};
+  const lowerMessage = userMessage.toLowerCase();
+
+  // 信任感变化
+  if (lowerMessage.includes('相信你') || lowerMessage.includes('信任你')) {
+    delta.trust = 5;
+  } else if (lowerMessage.includes('骗我') || lowerMessage.includes('说谎')) {
+    delta.trust = -5;
+  }
+
+  // 安全感变化
+  if (lowerMessage.includes('不会离开') || lowerMessage.includes('一直陪着')) {
+    delta.security = 5;
+  } else if (lowerMessage.includes('分手') || lowerMessage.includes('离开')) {
+    delta.security = -5;
+  }
+
+  // 亲密感变化
+  if (lowerMessage.includes('想你') || lowerMessage.includes('抱抱') || lowerMessage.includes('亲亲')) {
+    delta.closeness = 5;
+  }
+
+  // 依恋度变化
+  if (lowerMessage.includes('想见你') || lowerMessage.includes('想和你在一起')) {
+    delta.neediness = 5;
+  }
+
+  // 占有欲变化
+  if (lowerMessage.includes('别人') || lowerMessage.includes('其他')) {
+    delta.possessiveness = 3;
+  }
+
+  // 根据人格调整变化幅度
+  const neuroticismFactor = personality.neuroticism / 100;
+  const agreeablenessFactor = personality.agreeableness / 100;
+
+  if (delta.trust) delta.trust = Math.round(delta.trust * (1 + neuroticismFactor * 0.5));
+  if (delta.security) delta.security = Math.round(delta.security * (1 + agreeablenessFactor * 0.5));
+  if (delta.closeness) delta.closeness = Math.round(delta.closeness * (1 + agreeablenessFactor * 0.3));
+  if (delta.neediness) delta.neediness = Math.round(delta.neediness * (1 + neuroticismFactor * 0.3));
+  if (delta.possessiveness) delta.possessiveness = Math.round(delta.possessiveness * (1 + neuroticismFactor * 0.5));
+
+  return delta;
+}
+
+// ==================== Phase 2: 情绪深度系统 ====================
+
+// 情绪因子描述
+export const MOOD_FACTOR_DESCRIPTIONS: Record<string, string> = {
+  positiveMultiplier: '正面情绪倍率',
+  negativeMultiplier: '负面情绪倍率',
+  stressMultiplier: '压力倍率',
+};
+
+// 创建初始情绪深度系统
+export function createInitialEmotionalDepthSystem(): EmotionalDepthSystem {
+  return {
+    state: {
+      currentEmotion: 'neutral',
+      currentIntensity: 1,
+      moodFactor: 1.0,
+      stressLevel: 0,
+    },
+    history: [],
+    factors: {
+      positiveMultiplier: 1.0,
+      negativeMultiplier: 1.0,
+      stressMultiplier: 1.0,
+    },
+  };
+}
+
+// 更新情绪状态
+export function updateEmotionalState(
+  currentState: EmotionalState,
+  newEmotion: EmotionType,
+  newIntensity: number
+): EmotionalState {
+  // 计算情绪因子
+  const isPositive = ['happy', 'loving', 'excited', 'grateful'].includes(newEmotion);
+  const isNegative = ['sad', 'angry', 'fearful', 'anxious'].includes(newEmotion);
+
+  let moodFactor = 1.0;
+  if (isPositive) moodFactor = 1.0 + (newIntensity * 0.1);
+  if (isNegative) moodFactor = 1.0 - (newIntensity * 0.1);
+
+  // 更新压力等级
+  let stressLevel = currentState.stressLevel;
+  if (isNegative) stressLevel = Math.min(100, stressLevel + newIntensity * 5);
+  else stressLevel = Math.max(0, stressLevel - newIntensity * 2);
+
+  return {
+    currentEmotion: newEmotion,
+    currentIntensity: newIntensity,
+    moodFactor: Math.max(0.5, Math.min(1.5, moodFactor)),
+    stressLevel,
+  };
+}
+
+// ==================== Phase 2: 开场策略 ====================
+
+// 开场策略配置
+export const OPENING_STRATEGIES: OpeningStrategy[] = [
+  {
+    type: 'emotion_vent',
+    name: '情绪宣泄',
+    description: '直接表达情绪，如"好烦啊……"',
+    templates: [
+      '好烦啊……',
+      '今天好累……',
+      '心情不好……',
+      '有点难过……',
+      '好开心啊！',
+    ],
+  },
+  {
+    type: 'sensory_share',
+    name: '感官分享',
+    description: '描述感官体验，如刚洗完澡的触感',
+    templates: [
+      '刚洗完澡，好舒服~',
+      '外面下雨了，好凉快',
+      '刚吃完饭，好饱',
+      '阳光好好，好温暖',
+      '风好大，有点冷',
+    ],
+  },
+  {
+    type: 'schrodinger',
+    name: '薛定谔提问',
+    description: '制造好奇悬念，如"你猜我现在在干嘛"',
+    templates: [
+      '你猜我现在在干嘛？',
+      '你猜我今天遇到了什么？',
+      '你猜我想说什么？',
+      '你猜我刚才做了什么？',
+      '你猜我今天心情怎么样？',
+    ],
+  },
+  {
+    type: 'accidental',
+    name: '假装发错',
+    description: '模拟误发消息的效果',
+    templates: [
+      '啊，发错了……',
+      '不好意思，发错人了……',
+      '这个不是给你的……',
+      'Oops，发错了……',
+      '啊，不小心发出去了……',
+    ],
+  },
+  {
+    type: 'observer',
+    name: '观测者静默',
+    description: '不主动发开场白，等待用户先开口',
+    templates: [],
+  },
+];
+
+// 随机选择开场策略
+export function getRandomOpeningStrategy(): OpeningStrategyType {
+  const strategies: OpeningStrategyType[] = ['emotion_vent', 'sensory_share', 'schrodinger', 'accidental', 'observer'];
+  return strategies[Math.floor(Math.random() * strategies.length)];
+}
+
+// 获取开场白
+export function getOpeningMessage(strategyType: OpeningStrategyType): string | null {
+  const strategy = OPENING_STRATEGIES.find((s) => s.type === strategyType);
+  if (!strategy || strategy.templates.length === 0) return null;
+
+  return strategy.templates[Math.floor(Math.random() * strategy.templates.length)];
+}
+
+// ==================== Phase 2: 成就系统 ====================
+
+// 默认成就列表
+export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 'first_chat',
+    name: '初次相遇',
+    description: '完成第一次对话',
+    type: 'interaction',
+    icon: '💬',
+    condition: '发送第一条消息',
+    reward: 50,
+    unlocked: false,
+  },
+  {
+    id: 'chat_10',
+    name: '熟悉感',
+    description: '累计对话 10 轮',
+    type: 'interaction',
+    icon: '🗣️',
+    condition: '累计发送 10 条消息',
+    reward: 100,
+    unlocked: false,
+  },
+  {
+    id: 'chat_100',
+    name: '老朋友',
+    description: '累计对话 100 轮',
+    type: 'interaction',
+    icon: '👥',
+    condition: '累计发送 100 条消息',
+    reward: 200,
+    unlocked: false,
+  },
+  {
+    id: 'affection_500',
+    name: '心动瞬间',
+    description: '好感度达到 500',
+    type: 'relationship',
+    icon: '💕',
+    condition: '好感度达到 500',
+    reward: 150,
+    unlocked: false,
+  },
+  {
+    id: 'affection_1000',
+    name: '恋人未满',
+    description: '好感度达到 1000',
+    type: 'relationship',
+    icon: '❤️',
+    condition: '好感度达到 1000',
+    reward: 300,
+    unlocked: false,
+  },
+  {
+    id: 'morning_7',
+    name: '早安达人',
+    description: '连续 7 天说早安',
+    type: 'time',
+    icon: '🌅',
+    condition: '连续 7 天发送早安消息',
+    reward: 200,
+    unlocked: false,
+  },
+];
+
+// 默认角色卡成就
+export const DEFAULT_CHARACTER_CARD_ACHIEVEMENTS: CharacterCardAchievement[] = [
+  {
+    id: 'identity_card',
+    category: 'identity',
+    name: '身份卡',
+    description: '收集 3 个身份信息',
+    requiredCount: 3,
+    unlocked: false,
+  },
+  {
+    id: 'preference_card',
+    category: 'preference',
+    name: '喜好卡',
+    description: '收集 3 个喜好信息',
+    requiredCount: 3,
+    unlocked: false,
+  },
+  {
+    id: 'inner_world_card',
+    category: 'innerWorld',
+    name: '心事卡',
+    description: '收集 3 个心事信息',
+    requiredCount: 3,
+    unlocked: false,
+  },
+  {
+    id: 'habit_card',
+    category: 'habit',
+    name: '习惯卡',
+    description: '收集 3 个习惯信息',
+    requiredCount: 3,
+    unlocked: false,
+  },
+];
+
+// 创建初始成就系统
+export function createInitialAchievementSystem(): AchievementSystem {
+  return {
+    achievements: DEFAULT_ACHIEVEMENTS.map((a) => ({ ...a })),
+    characterCardAchievements: DEFAULT_CHARACTER_CARD_ACHIEVEMENTS.map((a) => ({ ...a })),
+    totalPoints: 0,
+  };
+}
+
+// 检查成就是否达成
+export function checkAchievements(
+  companion: Companion,
+  messageCount: number
+): string[] {
+  const unlockedIds: string[] = [];
+
+  // 检查互动类成就
+  if (messageCount >= 1 && !companion.achievements.achievements.find((a) => a.id === 'first_chat')?.unlocked) {
+    unlockedIds.push('first_chat');
+  }
+  if (messageCount >= 10 && !companion.achievements.achievements.find((a) => a.id === 'chat_10')?.unlocked) {
+    unlockedIds.push('chat_10');
+  }
+  if (messageCount >= 100 && !companion.achievements.achievements.find((a) => a.id === 'chat_100')?.unlocked) {
+    unlockedIds.push('chat_100');
+  }
+
+  // 检查关系类成就
+  if (companion.affection.points >= 500 && !companion.achievements.achievements.find((a) => a.id === 'affection_500')?.unlocked) {
+    unlockedIds.push('affection_500');
+  }
+  if (companion.affection.points >= 1000 && !companion.achievements.achievements.find((a) => a.id === 'affection_1000')?.unlocked) {
+    unlockedIds.push('affection_1000');
+  }
+
+  return unlockedIds;
+}
+
+// 检查角色卡成就
+export function checkCharacterCardAchievements(
+  companion: Companion
+): string[] {
+  const unlockedIds: string[] = [];
+
+  // 检查身份卡
+  const identityCount = companion.characterCard.collectionProgress.identity;
+  if (identityCount >= 3 && !companion.achievements.characterCardAchievements.find((a) => a.id === 'identity_card')?.unlocked) {
+    unlockedIds.push('identity_card');
+  }
+
+  // 检查喜好卡
+  const preferenceCount = companion.characterCard.collectionProgress.preferences;
+  if (preferenceCount >= 3 && !companion.achievements.characterCardAchievements.find((a) => a.id === 'preference_card')?.unlocked) {
+    unlockedIds.push('preference_card');
+  }
+
+  // 检查心事卡
+  const innerWorldCount = companion.characterCard.collectionProgress.innerWorld;
+  if (innerWorldCount >= 3 && !companion.achievements.characterCardAchievements.find((a) => a.id === 'inner_world_card')?.unlocked) {
+    unlockedIds.push('inner_world_card');
+  }
+
+  // 检查习惯卡
+  const habitCount = companion.characterCard.collectionProgress.habits;
+  if (habitCount >= 3 && !companion.achievements.characterCardAchievements.find((a) => a.id === 'habit_card')?.unlocked) {
+    unlockedIds.push('habit_card');
+  }
+
+  return unlockedIds;
 }

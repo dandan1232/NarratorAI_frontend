@@ -16,6 +16,10 @@ import {
   createInitialCharacterCard,
   createInitialAffection,
   createInitialMemory,
+  createInitialRelationshipSystem,
+  createInitialEmotionalDepthSystem,
+  getRandomOpeningStrategy,
+  createInitialAchievementSystem,
 } from '../utils/characterAnalyzer';
 
 const steps = [
@@ -131,6 +135,11 @@ export default function SetupPage() {
         characterCard: createInitialCharacterCard(),
         affection: createInitialAffection(),
         memory: createInitialMemory(),
+        // Phase 2: 关系系统、情绪深度、开场策略、成就系统
+        relationshipSystem: createInitialRelationshipSystem(),
+        emotionalDepth: createInitialEmotionalDepthSystem(),
+        openingStrategy: getRandomOpeningStrategy(),
+        achievements: createInitialAchievementSystem(),
       };
       addCompanion(newCompanion);
       setCurrentCompanion(newCompanion);

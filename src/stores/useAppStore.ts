@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import {
   AppState, CompanionState, User, Companion, ChatSession, Message, Memory, Voice,
-  CharacterCard, AffectionSystem, AffectionLevel, RevealedFact, SessionSummary, EmotionalMemory
+  CharacterCard, AffectionSystem, AffectionLevel, RevealedFact, SessionSummary, EmotionalMemory,
+  RelationshipDimensions, RelationshipLevel, EmotionalState, EmotionalHistoryEntry
 } from '../types';
 
 // 好感度等级计算
@@ -66,6 +67,18 @@ interface AppStore extends AppState, CompanionState {
   // 记忆相关
   addSessionSummary: (companionId: string, summary: SessionSummary) => void;
   addEmotionalMemory: (companionId: string, memory: EmotionalMemory) => void;
+
+  // Phase 2: 深化体验
+  // 关系系统相关
+  updateRelationshipDimensions: (companionId: string, updates: Partial<RelationshipDimensions>) => void;
+
+  // 情绪深度系统相关
+  updateEmotionalState: (companionId: string, updates: Partial<EmotionalState>) => void;
+  addEmotionalHistoryEntry: (companionId: string, entry: EmotionalHistoryEntry) => void;
+
+  // 成就系统相关
+  unlockAchievement: (companionId: string, achievementId: string) => void;
+  unlockCharacterCardAchievement: (companionId: string, category: string) => void;
 }
 
 const initialState: AppState & {
@@ -367,6 +380,145 @@ export const useAppStore = create<AppStore>()(
             currentCompanion:
               state.currentCompanion?.id === companionId
                 ? { ...state.currentCompanion, memory: updatedMemory }
+                : state.currentCompanion,
+          };
+        }),
+
+      // Phase 2: 深化体验
+      // 关系系统相关
+      updateRelationshipDimensions: (companionId, updates) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          const newDimensions = { ...companion.relationshipSystem.dimensions, ...updates };
+
+          // 计算整体关系等级
+          const avg = (newDimensions.trust + newDimensions.security + newDimensions.closeness + newDimensions.neediness + newDimensions.possessiveness) / 5;
+          let overallLevel: RelationshipLevel = 'frozen';
+          if (avg >= 81) overallLevel = 'full';
+          else if (avg >= 61) overallLevel = 'high';
+          else if (avg >= 41) overallLevel = 'medium';
+          else if (avg >= 21) overallLevel = 'low';
+
+          const updatedRelationshipSystem = {
+            ...companion.relationshipSystem,
+            dimensions: newDimensions,
+            overallLevel,
+            lastUpdate: Date.now(),
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, relationshipSystem: updatedRelationshipSystem } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, relationshipSystem: updatedRelationshipSystem }
+                : state.currentCompanion,
+          };
+        }),
+
+      // 情绪深度系统相关
+      updateEmotionalState: (companionId, updates) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          const updatedState = { ...companion.emotionalDepth.state, ...updates };
+
+          const updatedEmotionalDepth = {
+            ...companion.emotionalDepth,
+            state: updatedState,
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, emotionalDepth: updatedEmotionalDepth } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, emotionalDepth: updatedEmotionalDepth }
+                : state.currentCompanion,
+          };
+        }),
+
+      addEmotionalHistoryEntry: (companionId, entry) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          // 保持最近 50 条情绪历史
+          const updatedHistory = [...companion.emotionalDepth.history, entry].slice(-50);
+
+          const updatedEmotionalDepth = {
+            ...companion.emotionalDepth,
+            history: updatedHistory,
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, emotionalDepth: updatedEmotionalDepth } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, emotionalDepth: updatedEmotionalDepth }
+                : state.currentCompanion,
+          };
+        }),
+
+      // 成就系统相关
+      unlockAchievement: (companionId, achievementId) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          const updatedAchievements = companion.achievements.achievements.map((a) =>
+            a.id === achievementId ? { ...a, unlocked: true, unlockedAt: Date.now() } : a
+          );
+
+          const totalPoints = updatedAchievements
+            .filter((a) => a.unlocked)
+            .reduce((sum, a) => sum + a.reward, 0);
+
+          const updatedAchievementSystem = {
+            ...companion.achievements,
+            achievements: updatedAchievements,
+            totalPoints,
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, achievements: updatedAchievementSystem } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, achievements: updatedAchievementSystem }
+                : state.currentCompanion,
+          };
+        }),
+
+      unlockCharacterCardAchievement: (companionId, category) =>
+        set((state) => {
+          const companion = state.companions.find((c: Companion) => c.id === companionId);
+          if (!companion) return state;
+
+          const updatedAchievements = companion.achievements.characterCardAchievements.map((a) =>
+            a.category === category ? { ...a, unlocked: true, unlockedAt: Date.now() } : a
+          );
+
+          const updatedAchievementSystem = {
+            ...companion.achievements,
+            characterCardAchievements: updatedAchievements,
+          };
+
+          return {
+            companions: state.companions.map((c: Companion) =>
+              c.id === companionId ? { ...c, achievements: updatedAchievementSystem } : c
+            ),
+            currentCompanion:
+              state.currentCompanion?.id === companionId
+                ? { ...state.currentCompanion, achievements: updatedAchievementSystem }
                 : state.currentCompanion,
           };
         }),
