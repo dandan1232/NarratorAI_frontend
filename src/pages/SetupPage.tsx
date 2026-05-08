@@ -161,10 +161,10 @@ export default function SetupPage() {
             className="space-y-6"
           >
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 你好，很高兴见到你
               </h2>
-              <p className="text-gray-600">请告诉我你的昵称，这样我就能更好地陪伴你</p>
+              <p className="text-gray-600 dark:text-gray-300">请告诉我你的昵称，这样我就能更好地陪伴你</p>
             </div>
 
             <div className="max-w-sm mx-auto">
@@ -173,7 +173,7 @@ export default function SetupPage() {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 placeholder="输入你的昵称..."
-                className="w-full px-6 py-4 rounded-2xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none text-center text-lg transition-colors"
+                className="w-full px-6 py-4 rounded-2xl border-2 border-orange-200 dark:border-gray-600 focus:border-orange-400 dark:focus:border-orange-500 focus:outline-none bg-white dark:bg-gray-700 dark:text-gray-100 text-center text-lg transition-colors"
               />
             </div>
           </motion.div>
@@ -189,10 +189,10 @@ export default function SetupPage() {
             className="space-y-6"
           >
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 选择你的陪伴伙伴
               </h2>
-              <p className="text-gray-600">选择一个你喜欢的伙伴类型，或者自定义一个</p>
+              <p className="text-gray-600 dark:text-gray-300">选择一个你喜欢的伙伴类型，或者自定义一个</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -212,8 +212,8 @@ export default function SetupPage() {
                     </div>
                   )}
                   <div className="text-4xl mb-3">{template.avatar}</div>
-                  <h3 className="font-semibold text-gray-800">{template.name}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{template.relationship}</p>
+                  <h3 className="font-semibold text-gray-800 dark:text-gray-100">{template.name}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">{template.relationship}</p>
                 </button>
               ))}
             </div>
@@ -230,10 +230,10 @@ export default function SetupPage() {
             className="space-y-6"
           >
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 定制个性特点
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 描述你希望伙伴具有的性格特点，或者使用默认设置
               </p>
             </div>
@@ -241,14 +241,14 @@ export default function SetupPage() {
             <div className="max-w-md mx-auto">
               {selectedTemplate && (
                 <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-orange-50 to-amber-50">
-                  <h4 className="font-semibold text-gray-800 mb-2">默认性格特点：</h4>
+                  <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">默认性格特点：</h4>
                   <div className="flex flex-wrap gap-2">
                     {companionTemplates
                       .find((t) => t.id === selectedTemplate)
                       ?.traits.map((trait) => (
                         <span
                           key={trait}
-                          className="px-3 py-1 rounded-full bg-white text-sm text-orange-600 border border-orange-200"
+                          className="px-3 py-1 rounded-full bg-white text-sm text-orange-600 border border-orange-200 dark:border-gray-600"
                         >
                           {trait}
                         </span>
@@ -261,7 +261,7 @@ export default function SetupPage() {
                 value={customPersonality}
                 onChange={(e) => setCustomPersonality(e.target.value)}
                 placeholder="描述你想要的性格特点，例如：温柔、幽默、善解人意..."
-                className="w-full h-32 px-4 py-3 rounded-2xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none resize-none transition-colors"
+                className="w-full h-32 px-4 py-3 rounded-2xl border-2 border-orange-200 dark:border-gray-600 focus:border-orange-400 dark:focus:border-orange-500 focus:outline-none bg-white dark:bg-gray-700 dark:text-gray-100 resize-none transition-colors"
               />
             </div>
           </motion.div>
@@ -282,10 +282,10 @@ export default function SetupPage() {
               </div>
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
               一切准备就绪
             </h2>
-            <p className="text-gray-600 max-w-md mx-auto">
+            <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto">
               {nickname || '用户'}，你的陪伴伙伴已经准备好认识你了。
               点击开始，开启你们的对话之旅。
             </p>
@@ -295,7 +295,7 @@ export default function SetupPage() {
                 <span className="text-2xl">
                   {companionTemplates.find((t) => t.id === selectedTemplate)?.avatar}
                 </span>
-                <span className="font-medium text-gray-800">
+                <span className="font-medium text-gray-800 dark:text-gray-100">
                   {companionTemplates.find((t) => t.id === selectedTemplate)?.name}
                 </span>
               </div>
@@ -323,7 +323,7 @@ export default function SetupPage() {
                 className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
                   currentStep >= step.id
                     ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg'
-                    : 'bg-gray-200 text-gray-500'
+                    : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 dark:text-gray-500'
                 }`}
               >
                 {currentStep > step.id ? (
@@ -335,7 +335,7 @@ export default function SetupPage() {
               {index < steps.length - 1 && (
                 <div
                   className={`w-20 h-1 mx-2 transition-colors duration-300 ${
-                    currentStep > step.id ? 'bg-orange-500' : 'bg-gray-200'
+                    currentStep > step.id ? 'bg-orange-500' : 'bg-gray-200 dark:bg-gray-600'
                   }`}
                 />
               )}
@@ -355,8 +355,8 @@ export default function SetupPage() {
             disabled={currentStep === 1}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
               currentStep === 1
-                ? 'opacity-50 cursor-not-allowed text-gray-400'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100'
             }`}
           >
             <ArrowLeft className="w-4 h-4" />

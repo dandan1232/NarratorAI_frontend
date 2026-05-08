@@ -5,6 +5,15 @@ import {
   CharacterCard, AffectionSystem, AffectionLevel, RevealedFact, SessionSummary, EmotionalMemory,
   RelationshipDimensions, RelationshipLevel, EmotionalState, EmotionalHistoryEntry
 } from '../types';
+import {
+  createInitialCharacterCard,
+  createInitialAffection,
+  createInitialMemory,
+  createInitialRelationshipSystem,
+  createInitialEmotionalDepthSystem,
+  getRandomOpeningStrategy,
+  createInitialAchievementSystem,
+} from '../utils/characterAnalyzer';
 
 // 好感度等级计算
 function calculateAffectionLevel(points: number): AffectionLevel {
@@ -14,6 +23,20 @@ function calculateAffectionLevel(points: number): AffectionLevel {
   if (points <= 700) return 'close';
   if (points <= 900) return 'crush';
   return 'lover';
+}
+
+// 迁移旧数据：确保伴侣有所有必需字段
+function migrateCompanion(companion: any): Companion {
+  return {
+    ...companion,
+    characterCard: companion.characterCard || createInitialCharacterCard(),
+    affection: companion.affection || createInitialAffection(),
+    memory: companion.memory || createInitialMemory(),
+    relationshipSystem: companion.relationshipSystem || createInitialRelationshipSystem(),
+    emotionalDepth: companion.emotionalDepth || createInitialEmotionalDepthSystem(),
+    openingStrategy: companion.openingStrategy || getRandomOpeningStrategy(),
+    achievements: companion.achievements || createInitialAchievementSystem(),
+  };
 }
 
 interface AppStore extends AppState, CompanionState {
@@ -533,6 +556,14 @@ export const useAppStore = create<AppStore>()(
         voices: state.voices,
         isInitialized: state.isInitialized,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.companions) {
+          state.companions = state.companions.map(migrateCompanion);
+          if (state.currentCompanion) {
+            state.currentCompanion = migrateCompanion(state.currentCompanion);
+          }
+        }
+      },
     }
   )
 );

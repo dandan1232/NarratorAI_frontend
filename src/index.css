@@ -50,6 +50,11 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.dark .glass {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .glass-dark {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px);
@@ -130,6 +135,16 @@ body {
   margin-right: auto;
   border-bottom-left-radius: 4px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dark .message-bubble.assistant {
+  background: #1e293b;
+  color: #e2e8f0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .message-bubble.user {
+  opacity: 0.9;
 }
 
 /* Typing indicator */

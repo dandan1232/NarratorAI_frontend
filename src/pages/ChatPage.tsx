@@ -261,13 +261,13 @@ export default function ChatPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center">
-            <Smile className="w-12 h-12 text-orange-400" />
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 dark:from-orange-800 dark:to-amber-800 flex items-center justify-center">
+            <Smile className="w-12 h-12 text-orange-400 dark:text-orange-300" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
             选择一个伙伴开始聊天
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             从左侧选择一个陪伴伙伴，或者创建一个新的
           </p>
         </motion.div>
@@ -283,15 +283,15 @@ export default function ChatPage() {
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="p-4 bg-white/80 backdrop-blur-xl border-b border-white/20"
+        className="p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-white/20 dark:border-gray-700/50 transition-colors"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center text-2xl">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 dark:from-orange-800 dark:to-amber-800 flex items-center justify-center text-2xl">
               {currentCompanion.avatar}
             </div>
             <div>
-              <h2 className="font-semibold text-gray-800">
+              <h2 className="font-semibold text-gray-800 dark:text-gray-100">
                 {currentCompanion.name}
               </h2>
               <AffectionDisplay affection={currentCompanion.affection} />
@@ -299,13 +299,13 @@ export default function ChatPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <Volume2 className="w-5 h-5 text-gray-500" />
+            <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              <Volume2 className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </button>
             <button
               onClick={() => setShowPanel(!showPanel)}
               className={`p-2 rounded-lg transition-colors ${
-                showPanel ? 'bg-orange-100 text-orange-600' : 'hover:bg-gray-100 text-gray-500'
+                showPanel ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400'
               }`}
               title="关系档案"
             >
@@ -336,7 +336,7 @@ export default function ChatPage() {
                 {message.role === 'assistant' && (
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{currentCompanion.avatar}</span>
-                    <span className="text-sm font-medium text-gray-600">
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       {currentCompanion.name}
                     </span>
                   </div>
@@ -420,7 +420,7 @@ export default function ChatPage() {
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="p-4 bg-white/80 backdrop-blur-xl border-t border-white/20"
+        className="p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-t border-white/20 dark:border-gray-700/50 transition-colors"
       >
         <div className="flex items-end gap-4 max-w-4xl mx-auto">
           <div className="flex-1 relative">
@@ -430,20 +430,20 @@ export default function ChatPage() {
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="输入你想说的话..."
-              className="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none resize-none transition-colors"
+              className="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-orange-200 dark:border-gray-600 focus:border-orange-400 dark:focus:border-orange-500 focus:outline-none resize-none transition-colors bg-white dark:bg-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               rows={1}
               style={{ minHeight: '48px', maxHeight: '120px' }}
             />
 
             <div className="absolute right-2 bottom-2 flex items-center gap-1">
               <button
-                className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 title="发送图片"
               >
                 <Image className="w-5 h-5 text-gray-400" />
               </button>
               <button
-                className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 title="表情"
               >
                 <Smile className="w-5 h-5 text-gray-400" />
@@ -457,7 +457,7 @@ export default function ChatPage() {
               className={`p-3 rounded-xl transition-all duration-200 ${
                 isRecording
                   ? 'bg-red-500 text-white animate-pulse'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
               title={isRecording ? '停止录音' : '语音输入'}
             >
@@ -474,7 +474,7 @@ export default function ChatPage() {
               className={`p-3 rounded-xl transition-all duration-200 ${
                 inputText.trim()
                   ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white hover:shadow-lg'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
               }`}
             >
               <Send className="w-5 h-5" />

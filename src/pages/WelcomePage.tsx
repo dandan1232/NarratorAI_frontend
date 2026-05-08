@@ -49,8 +49,8 @@ export default function WelcomePage() {
             <h1 className="text-5xl font-bold mb-4">
               <span className="gradient-text">声悦</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-2">NarratorAI</p>
-            <p className="text-gray-500 max-w-md mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-2">NarratorAI</p>
+            <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
               你的智能情感陪伴伙伴，在这里找到温暖与理解
             </p>
           </motion.div>
@@ -63,31 +63,31 @@ export default function WelcomePage() {
             className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
           >
             <div className="glass rounded-2xl p-6 card-hover">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center">
                 <MessageCircle className="w-6 h-6 text-orange-500" />
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2">情感陪伴</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">情感陪伴</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 温暖的话语，真诚的倾听，让心灵得到慰藉
               </p>
             </div>
 
             <div className="glass rounded-2xl p-6 card-hover">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-amber-500" />
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2">个性化记忆</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">个性化记忆</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 记住你的喜好，理解你的心情，成为最懂你的人
               </p>
             </div>
 
             <div className="glass rounded-2xl p-6 card-hover">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-yellow-100 flex items-center justify-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center">
                 <Heart className="w-6 h-6 text-yellow-500" />
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2">语音对话</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">语音对话</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 自然流畅的语音交互，让陪伴更加真实温暖
               </p>
             </div>
@@ -108,7 +108,7 @@ export default function WelcomePage() {
             开始旅程
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
             点击开始，遇见你的专属陪伴伙伴
           </p>
         </motion.div>
