@@ -1,5 +1,6 @@
 // 使用代理路径，避免 CORS 问题
 const MIMO_PROXY_PATH = '/mimo';
+const MIMO_TTS_PROXY_PATH = '/mimo-tts';
 
 export interface MimoMessage {
   role: 'user' | 'assistant' | 'system';
@@ -22,9 +23,11 @@ export interface MimoTTSRequest {
 
 class MimoClient {
   private proxyPath: string;
+  private ttsProxyPath: string;
 
   constructor() {
     this.proxyPath = MIMO_PROXY_PATH;
+    this.ttsProxyPath = MIMO_TTS_PROXY_PATH;
   }
 
   // 通用请求方法
@@ -86,83 +89,104 @@ class MimoClient {
     return textBlock?.text || '';
   }
 
-  // 语音合成 - 使用 MiMo-V2.5-TTS
-  async tts(
-    text: string,
-    voiceId?: string,
-    model: string = 'MiMo-V2.5-TTS'
+  // TTS 通用请求 - 使用 /v1/chat/completions 端点
+  private async ttsRequest(
+    model: string,
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    audioConfig: { format?: string; voice?: string }
   ): Promise<ArrayBuffer> {
-    const response = await fetch(`${this.proxyPath}/audio/speech`, {
+    const response = await fetch(`${this.ttsProxyPath}/v1/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model,
-        input: text,
-        voice: voiceId || 'alloy',
+        messages,
+        audio: {
+          format: audioConfig.format || 'wav',
+          ...(audioConfig.voice && { voice: audioConfig.voice }),
+        },
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`TTS error: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`TTS error: ${response.status} - ${errorText}`);
     }
 
-    return response.arrayBuffer();
+    const result = await response.json();
+    const audioData = result?.choices?.[0]?.message?.audio?.data;
+    if (!audioData) {
+      throw new Error('No audio data in response');
+    }
+
+    // base64 解码为 ArrayBuffer
+    const binaryString = atob(audioData);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
   }
 
-  // 声音克隆 - 使用 MiMo-V2.5-TTS-VoiceClone
+  // 语音合成 - 使用预置音色
+  async tts(
+    text: string,
+    voiceId?: string,
+    styleInstruction?: string
+  ): Promise<ArrayBuffer> {
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+    if (styleInstruction) {
+      messages.push({ role: 'user', content: styleInstruction });
+    }
+    messages.push({ role: 'assistant', content: text });
+
+    return this.ttsRequest('mimo-v2.5-tts', messages, {
+      format: 'wav',
+      voice: voiceId || 'mimo_default',
+    });
+  }
+
+  // 声音克隆 - 基于音频样本复刻音色并合成
   async cloneVoice(
-    name: string,
     audioFile: File,
-    description?: string
-  ): Promise<{ voice_id: string }> {
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('audio', audioFile);
-    if (description) {
-      formData.append('description', description);
+    text: string,
+    styleInstruction?: string
+  ): Promise<ArrayBuffer> {
+    // 读取音频文件为 base64
+    const arrayBuffer = await audioFile.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
     }
+    const base64Audio = btoa(binary);
 
-    const response = await fetch(`${this.proxyPath}/audio/voices/clone`, {
-      method: 'POST',
-      body: formData,
+    const mimeType = audioFile.type || 'audio/wav';
+    const voiceData = `data:${mimeType};base64,${base64Audio}`;
+
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+    if (styleInstruction) {
+      messages.push({ role: 'user', content: styleInstruction });
+    }
+    messages.push({ role: 'assistant', content: text });
+
+    return this.ttsRequest('mimo-v2.5-tts-voiceclone', messages, {
+      format: 'wav',
+      voice: voiceData,
     });
-
-    if (!response.ok) {
-      throw new Error(`Voice clone error: ${response.status}`);
-    }
-
-    return response.json();
   }
 
-  // 声音设计 - 使用 MiMo-V2.5-TTS-VoiceDesign
+  // 声音设计 - 通过文本描述生成音色
   async designVoice(
-    name: string,
-    description: string,
-    gender: 'male' | 'female' | 'neutral',
-    age: 'young' | 'middle' | 'old',
-    style: string
-  ): Promise<{ voice_id: string }> {
-    const response = await fetch(`${this.proxyPath}/audio/voices/design`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name,
-        description,
-        gender,
-        age,
-        style,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Voice design error: ${response.status}`);
-    }
-
-    return response.json();
+    voiceDescription: string,
+    text: string
+  ): Promise<ArrayBuffer> {
+    return this.ttsRequest('mimo-v2.5-tts-voicedesign', [
+      { role: 'user', content: voiceDescription },
+      { role: 'assistant', content: text },
+    ], { format: 'wav' });
   }
 
   // 情绪检测

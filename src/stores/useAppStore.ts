@@ -551,7 +551,9 @@ export const useAppStore = create<AppStore>()(
       partialize: (state) => ({
         user: state.user,
         companions: state.companions,
+        currentCompanion: state.currentCompanion,
         sessions: state.sessions,
+        currentSession: state.currentSession,
         memories: state.memories,
         voices: state.voices,
         isInitialized: state.isInitialized,

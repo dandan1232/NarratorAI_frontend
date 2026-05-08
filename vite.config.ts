@@ -36,6 +36,17 @@ export default defineConfig(({ mode }) => {
             });
           },
         },
+        '/mimo-tts': {
+          target: 'https://api.xiaomimimo.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/mimo-tts/, ''),
+          configure: (proxy, options) => {
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              const apiKey = env.VITE_MIMO_AUTH_TOKEN || process.env.VITE_MIMO_AUTH_TOKEN || '';
+              proxyReq.setHeader('Authorization', `Bearer ${apiKey}`);
+            });
+          },
+        },
         '/sticker': {
           target: 'https://api.tangdouz.com',
           changeOrigin: true,

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAppStore } from './stores/useAppStore';
 import WelcomePage from './pages/WelcomePage';
 import SetupPage from './pages/SetupPage';
@@ -9,22 +9,39 @@ import VoicePage from './pages/VoicePage';
 import Layout from './components/Layout';
 
 function App() {
-  const { isInitialized, currentView, setCurrentView } = useAppStore();
+  const { isInitialized, setCurrentView, companions, currentCompanion, setCurrentCompanion, sessions, setCurrentSession } = useAppStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
+  // Sync currentView with URL path
   useEffect(() => {
     if (!isInitialized) {
       setCurrentView('welcome');
-      navigate('/');
+      return;
     }
-  }, [isInitialized, setCurrentView, navigate]);
+    const path = location.pathname;
+    if (path.startsWith('/chat')) setCurrentView('chat');
+    else if (path.startsWith('/voice')) setCurrentView('voice');
+    else if (path.startsWith('/settings')) setCurrentView('settings');
+    else if (path.startsWith('/setup')) setCurrentView('setup');
+  }, [location.pathname, isInitialized, setCurrentView]);
 
-  // Auto-navigate to chat if setup is complete
+  // Auto-select companion if none selected but companions exist
   useEffect(() => {
-    if (isInitialized && currentView === 'chat') {
+    if (isInitialized && !currentCompanion && companions.length > 0) {
+      const first = companions[0];
+      setCurrentCompanion(first);
+      const session = sessions.find((s) => s.companionId === first.id);
+      setCurrentSession(session || null);
+    }
+  }, [isInitialized, currentCompanion, companions, sessions, setCurrentCompanion, setCurrentSession]);
+
+  // Auto-navigate to chat if setup is complete and on root
+  useEffect(() => {
+    if (isInitialized && location.pathname === '/' && companions.length > 0) {
       navigate('/chat');
     }
-  }, [isInitialized, currentView, navigate]);
+  }, [isInitialized, location.pathname, companions.length, navigate]);
 
   return (
     <Layout>
