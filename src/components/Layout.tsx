@@ -28,7 +28,7 @@ export default function Layout({ children }: LayoutProps) {
         )}
 
         {/* Main content */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden md:ml-0 ml-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentView}

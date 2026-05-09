@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppStore } from '../stores/useAppStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,15 +13,33 @@ import {
   Sparkles,
   Trash2,
   Heart,
+  Menu,
+  X,
 } from 'lucide-react';
 import { Companion } from '../types';
 import { AFFECTION_LEVEL_NAMES } from '../utils/characterAnalyzer';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Companion | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // 检测移动端
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsCollapsed(true);
+      }
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const {
     companions, currentCompanion, setCurrentCompanion,
     sessions, setCurrentSession,
@@ -39,6 +57,10 @@ export default function Sidebar() {
   const handleNavigate = (path: string, view: typeof currentView) => {
     setCurrentView(view);
     navigate(path);
+    // 移动端点击后自动关闭菜单
+    if (isMobile) {
+      setIsMobileOpen(false);
+    }
   };
 
   const handleSelectCompanion = (companion: Companion) => {
@@ -70,11 +92,39 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* 移动端汉堡菜单按钮 */}
+      {isMobile && (
+        <button
+          onClick={() => setIsMobileOpen(true)}
+          className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        >
+          <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+        </button>
+      )}
+
+      {/* 移动端遮罩层 */}
+      <AnimatePresence>
+        {isMobile && isMobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            onClick={() => setIsMobileOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
       <motion.aside
-        initial={{ width: 280 }}
-        animate={{ width: isCollapsed ? 80 : 280 }}
+        initial={false}
+        animate={{
+          width: isMobile ? 280 : (isCollapsed ? 80 : 280),
+          x: isMobile ? (isMobileOpen ? 0 : -280) : 0,
+        }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className="h-screen bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl border-r border-white/20 dark:border-gray-700/50 shadow-lg flex flex-col transition-colors"
+        className={`${
+          isMobile ? 'fixed left-0 top-0 z-50' : 'relative'
+        } h-screen bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl border-r border-white/20 dark:border-gray-700/50 shadow-lg flex flex-col transition-colors`}
       >
         {/* Header */}
         <div className="p-4 border-b border-gray-100 dark:border-gray-700">
@@ -99,16 +149,25 @@ export default function Sidebar() {
               )}
             </AnimatePresence>
 
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              {isCollapsed ? (
-                <ChevronRight className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-              ) : (
-                <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-              )}
-            </button>
+            {isMobile ? (
+              <button
+                onClick={() => setIsMobileOpen(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                {isCollapsed ? (
+                  <ChevronRight className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                ) : (
+                  <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                )}
+              </button>
+            )}
           </div>
         </div>
 
