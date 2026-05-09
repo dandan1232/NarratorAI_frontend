@@ -14,6 +14,8 @@ import {
   Trash2,
   Save,
   Check,
+  Download,
+  Upload,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -58,6 +60,47 @@ export default function SettingsPage() {
     reset();
     setCurrentView('welcome');
     navigate('/');
+  };
+
+  const handleExport = () => {
+    const data = localStorage.getItem('narrator-ai-storage');
+    if (!data) return;
+
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `narrator-ai-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showSaved('数据已导出');
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const data = JSON.parse(text);
+
+        // 验证基本结构
+        if (!data.state || !data.state.companions) {
+          alert('文件格式不正确，请选择正确的备份文件');
+          return;
+        }
+
+        localStorage.setItem('narrator-ai-storage', text);
+        showSaved('数据已导入，刷新页面生效');
+      } catch {
+        alert('文件解析失败，请确认文件格式正确');
+      }
+    };
+    reader.readAsText(file);
+    // 清空 input 以便重复导入同一文件
+    e.target.value = '';
   };
 
   return (
@@ -214,6 +257,38 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+
+        {/* Data Management */}
+        <div className="glass rounded-2xl p-6 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Download className="w-5 h-5 text-orange-500" />
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">数据管理</h2>
+          </div>
+
+          <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+            导出所有数据（聊天记录、伙伴设置、偏好等）为 JSON 文件，可用于备份或迁移到其他设备。
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white font-medium hover:shadow-lg transition-all"
+            >
+              <Download className="w-4 h-4" />
+              导出数据
+            </button>
+            <label className="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-orange-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium hover:bg-orange-50 dark:hover:bg-gray-700 transition-all cursor-pointer">
+              <Upload className="w-4 h-4" />
+              导入数据
+              <input
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleImport}
+              />
+            </label>
+          </div>
+        </div>
 
         {/* Danger Zone */}
         <div className="glass rounded-2xl p-6 border-2 border-red-200">
