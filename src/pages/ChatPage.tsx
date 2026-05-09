@@ -240,12 +240,36 @@ export default function ChatPage() {
     try {
       const systemPrompt = buildSystemPrompt(currentCompanion);
 
-      const messages: MimoMessage[] = currentSession.messages
-        .filter((msg: Message) => msg.role !== 'assistant' || msg.id !== currentSession.messages[0]?.id)
-        .map((msg: Message) => ({
+      // 过滤掉 greeting，保留后续对话
+      const historyMessages = currentSession.messages
+        .filter((msg: Message) => msg.role !== 'assistant' || msg.id !== currentSession.messages[0]?.id);
+
+      const recentMessages = historyMessages.slice(-20);
+
+      const messages: MimoMessage[] = [];
+
+      // 如果历史超过 20 条，注入会话摘要作为上下文
+      if (historyMessages.length > 20 && currentCompanion.memory.sessionSummaries.length > 0) {
+        const latestSummary = currentCompanion.memory.sessionSummaries[currentCompanion.memory.sessionSummaries.length - 1];
+        const summaryParts = [latestSummary.summary];
+        if (latestSummary.keyEvents.length > 0) {
+          summaryParts.push(`关键事件: ${latestSummary.keyEvents.join('、')}`);
+        }
+        if (latestSummary.emotionTrend) {
+          summaryParts.push(`情绪趋势: ${latestSummary.emotionTrend}`);
+        }
+        messages.push({
+          role: 'system' as const,
+          content: `【之前对话摘要】${summaryParts.join('；')}`,
+        });
+      }
+
+      recentMessages.forEach((msg: Message) => {
+        messages.push({
           role: msg.role,
           content: msg.content,
-        }));
+        });
+      });
 
       messages.push({
         role: 'user',
