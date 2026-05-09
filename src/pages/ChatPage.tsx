@@ -78,6 +78,15 @@ function getQuickReplies(lastMessage: string): string[] {
   return replies.slice(0, 3);
 }
 
+// 常用表情
+const EMOJI_LIST = [
+  '😊', '😂', '🥰', '😍', '🤗', '😘', '💕', '🥺',
+  '😭', '🤣', '😌', '😏', '🤔', '😮', '😢', '😤',
+  '🥰', '😴', '🫣', '🤭', '😋', '🤪', '😎', '🥺',
+  '👍', '👋', '🤝', '💪', '❤️', '🔥', '⭐', '🎉',
+  '☕', '🌙', '☀️', '🌸', '🎵', '📱', '💬', '✅',
+];
+
 export default function ChatPage() {
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -88,6 +97,7 @@ export default function ChatPage() {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ messageId: string; x: number; y: number; content: string } | null>(null);
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -414,6 +424,24 @@ export default function ChatPage() {
     }
   };
 
+  const insertEmoji = (emoji: string) => {
+    const textarea = inputRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newText = inputText.slice(0, start) + emoji + inputText.slice(end);
+      setInputText(newText);
+      // 光标移到表情后面
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+        textarea.focus();
+      }, 0);
+    } else {
+      setInputText(inputText + emoji);
+    }
+    setShowEmojiPicker(false);
+  };
+
   const toggleRecording = () => {
     setIsRecording(!isRecording);
   };
@@ -649,10 +677,13 @@ export default function ChatPage() {
                   <Image className="w-5 h-5 text-gray-400" />
                 </button>
                 <button
-                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className={`p-1.5 rounded-lg transition-colors ${
+                    showEmojiPicker ? 'bg-orange-100 dark:bg-orange-900/40' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
                   title="表情"
                 >
-                  <Smile className="w-5 h-5 text-gray-400" />
+                  <Smile className={`w-5 h-5 ${showEmojiPicker ? 'text-orange-500' : 'text-gray-400'}`} />
                 </button>
               </div>
             </div>
@@ -694,6 +725,30 @@ export default function ChatPage() {
             </p>
           </div>
         </motion.div>
+
+        {/* Emoji Picker */}
+        <AnimatePresence>
+          {showEmojiPicker && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="mx-4 mb-2 p-3 rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700"
+            >
+              <div className="grid grid-cols-8 gap-1">
+                {EMOJI_LIST.map((emoji, i) => (
+                  <button
+                    key={i}
+                    onClick={() => insertEmoji(emoji)}
+                    className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-lg"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Collection Toast */}
         <CollectionToast
